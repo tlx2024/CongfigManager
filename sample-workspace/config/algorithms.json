@@ -1,0 +1,163 @@
+{
+    "algorithms": [
+        {
+            "name": "RandomBoxAlgorithm",
+            "enabled": true,
+            "lib_path_windows": "./libs/RandomBoxAlgorithm.dll",
+            "lib_path_linux": "./libs/libRandomBoxAlgorithm.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "RandomBoxAlgorithm",
+            "model_config": {
+                "model_path": "./config/models/RandomBoxModel.xml"
+            }
+        },
+        {
+            "name": "CircleDetection",
+            "enabled": true,
+            "lib_path_windows": "./libs/CircleDetection.dll",
+            "lib_path_linux": "./libs/libCircleDetection.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "CircleDetection",
+            "model_config": {
+                "model_path": "./config/models/CircleDetectionModel.xml"
+            }
+        },
+        {
+            "name": "MyProcessModule",
+            "enabled": true,
+            "lib_path_windows": "./libs/MyProcessModule.dll",
+            "lib_path_linux": "./libs/libMyProcessModule.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "轮廓检测测试模块001",
+            "dependency_paths": [
+                "./libs/MyProcessModule"
+            ],
+            "model_config": {
+                "model_path": "./config/models/CIMP_CONTOUR_TEST_001_Model.xml"
+            }
+        },
+        {
+            "name": "TensorRTYoloDetect",
+            "enabled": true,
+            "lib_path_windows": "./libs/TensorRTYoloDetect.dll",
+            "lib_path_linux": "./libs/libTensorRTYoloDetect.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "TensorRT_Detect",
+            "model_config": {
+                "model_path": "./config/models/TensorRTYoloDetectModel.xml"
+            }
+        },
+        {
+            "name": "TensorRTYoloClassify",
+            "enabled": true,
+            "lib_path_windows": "./libs/TensorRTYoloDetect.dll",
+            "lib_path_linux": "./libs/libTensorRTYoloDetect.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "TensorRT_Classify",
+            "model_config": {
+                "model_path": "./config/models/TensorRTYoloDetectModel.xml"
+            }
+        },
+        {
+            "name": "TensorRTYoloOBB",
+            "enabled": true,
+            "lib_path_windows": "./libs/TensorRTYoloDetect.dll",
+            "lib_path_linux": "./libs/libTensorRTYoloDetect.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "TensorRT_OBB",
+            "model_config": {
+                "model_path": "./config/models/TensorRTYoloDetectModel.xml"
+            }
+        },
+        {
+            "name": "TensorRTYoloPose",
+            "enabled": true,
+            "lib_path_windows": "./libs/TensorRTYoloDetect.dll",
+            "lib_path_linux": "./libs/libTensorRTYoloDetect.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "TensorRT_Pose",
+            "model_config": {
+                "model_path": "./config/models/TensorRTYoloDetectModel.xml"
+            }
+        },
+        {
+            "name": "TensorRTYoloSegment",
+            "enabled": true,
+            "lib_path_windows": "./libs/TensorRTYoloDetect.dll",
+            "lib_path_linux": "./libs/libTensorRTYoloDetect.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "TensorRT_Segment",
+            "model_config": {
+                "model_path": "./config/models/TensorRTYoloDetectModel.xml"
+            }
+        },
+        {
+            "name": "NNDeployDetect",
+            "enabled": true,
+            "lib_path_windows": "./libs/nndeployDemo.dll",
+            "lib_path_linux": "./libs/libnndeployDemo.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "NNDeploy_Detect",
+            "dependency_paths": [
+                "./libs/NNDeployDemo"
+            ],
+            "model_config": {
+                "model_path": "./config/models/NNDeployModel.xml"
+            }
+        },
+        {
+            "name": "NNDeployClassify",
+            "enabled": true,
+            "lib_path_windows": "./libs/nndeployDemo.dll",
+            "lib_path_linux": "./libs/libnndeployDemo.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "NNDeploy_Classify",
+            "dependency_paths": [
+                "./libs/NNDeployDemo"
+            ],
+            "model_config": {
+                "model_path": "./config/models/NNDeployModel.xml"
+            }
+        },
+        {
+            "name": "NNDeploySegment",
+            "enabled": true,
+            "lib_path_windows": "./libs/nndeployDemo.dll",
+            "lib_path_linux": "./libs/libnndeployDemo.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "NNDeploy_Segment",
+            "dependency_paths": [
+                "./libs/NNDeployDemo"
+            ],
+            "model_config": {
+                "model_path": "./config/models/NNDeployModel.xml"
+            }
+        },
+        {
+            "name": "NNDeployOCR",
+            "enabled": true,
+            "lib_path_windows": "./libs/nndeployDemo.dll",
+            "lib_path_linux": "./libs/libnndeployDemo.so",
+            "create_function": "CreateAlgorithm",
+            "version_function": "GetInterfaceVersion",
+            "algorithm_name": "NNDeploy_OCR",
+            "dependency_paths": [
+                "./libs/NNDeployDemo"
+            ],
+            "model_config": {
+                "model_path": "./config/models/NNDeployModel.xml"
+            }
+        }
+    ]
+}

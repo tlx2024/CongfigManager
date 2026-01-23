@@ -1,0 +1,138 @@
+{
+  "createdAt": 1767860704,
+  "createdBy": "tlx",
+  "description": "从JSON推导",
+  "groups": [
+    {
+      "collapsible": true,
+      "defaultCollapsed": false,
+      "fields": [],
+      "label": "基础配置",
+      "name": "General",
+      "order": 1
+    },
+    {
+      "label": "algorithms",
+      "name": "algorithms",
+      "order": 2,
+      "type": "array",
+      "ui": {
+        "addButtonText": "添加项",
+        "collapsible": true,
+        "itemLabel": "项",
+        "itemTemplate": {
+          "fields": [
+            {
+              "defaultValue": "RandomBoxAlgorithm",
+              "key": "algorithm_name",
+              "label": "algorithm_name",
+              "order": 1,
+              "type": "string",
+              "validation": {
+                "required": false
+              }
+            },
+            {
+              "defaultValue": "CreateAlgorithm",
+              "key": "create_function",
+              "label": "create_function",
+              "order": 2,
+              "type": "string",
+              "validation": {
+                "required": false
+              }
+            },
+            {
+              "defaultValue": [
+                "./libs/MyProcessModule"
+              ],
+              "key": "dependency_paths",
+              "label": "dependency_paths",
+              "order": 3,
+              "type": "array",
+              "validation": {
+                "required": false
+              }
+            },
+            {
+              "defaultValue": true,
+              "key": "enabled",
+              "label": "enabled",
+              "order": 4,
+              "type": "boolean",
+              "validation": {
+                "required": false
+              }
+            },
+            {
+              "defaultValue": "./libs/libRandomBoxAlgorithm.so",
+              "key": "lib_path_linux",
+              "label": "lib_path_linux",
+              "order": 5,
+              "type": "string",
+              "validation": {
+                "required": false
+              }
+            },
+            {
+              "defaultValue": "./libs/RandomBoxAlgorithm.dll",
+              "key": "lib_path_windows",
+              "label": "lib_path_windows",
+              "order": 6,
+              "type": "string",
+              "validation": {
+                "required": false
+              }
+            },
+            {
+              "defaultValue": {},
+              "fields": [
+                {
+                  "defaultValue": "./config/models/RandomBoxModel.xml",
+                  "key": "model_path",
+                  "label": "model_path",
+                  "order": 1,
+                  "type": "string",
+                  "validation": {
+                    "required": false
+                  }
+                }
+              ],
+              "key": "model_config",
+              "label": "model_config",
+              "order": 7,
+              "type": "object",
+              "validation": {
+                "required": false
+              }
+            },
+            {
+              "defaultValue": "RandomBoxAlgorithm",
+              "key": "name",
+              "label": "name",
+              "order": 8,
+              "type": "string",
+              "validation": {
+                "required": false
+              }
+            },
+            {
+              "defaultValue": "GetInterfaceVersion",
+              "key": "version_function",
+              "label": "version_function",
+              "order": 9,
+              "type": "string",
+              "validation": {
+                "required": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "name": "algorithms_json",
+  "updatedAt": 1767860704,
+  "updatedBy": "tlx",
+  "version": "1.0.0"
+}

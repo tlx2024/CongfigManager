@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+
+# Frontend build output
+frontend/dist/
+
+# Tauri/Rust
+src-tauri/target/
+src-tauri/gen/
