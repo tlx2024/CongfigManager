@@ -1,0 +1,50 @@
+name: build (Windows EXE)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Tauri (Windows)
+        env:
+          CI: 'true'
+        run: npx tauri build
+
+      - name: Upload artifacts (bundle)
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-manager-windows-bundle
+          path: src-tauri/target/release/bundle/**
+
+      - name: Upload artifacts (exe)
+        uses: actions/upload-artifact@v4
+        with:
+          name: config-manager-windows-exe
+          path: |
+            src-tauri/target/release/*.exe
+            src-tauri/target/release/config_manager.exe
+            src-tauri/target/release/*config*manager*.exe
