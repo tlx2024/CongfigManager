@@ -29,6 +29,9 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Install root deps (tauri cli)
+        run: npm ci
+
       - name: Build Tauri (macOS)
         env:
           CI: 'true'
