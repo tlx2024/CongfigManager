@@ -1,6 +1,7 @@
 {
     "name": "config-manager-frontend",
     "private": true,
+    "license": "AGPL-3.0-or-later",
     "version": "0.1.0",
     "type": "module",
     "scripts": {
@@ -12,6 +13,7 @@
         "@tauri-apps/api": "^2.0.0",
         "@tauri-apps/plugin-dialog": "^2.0.0",
         "antd": "^5.14.0",
+        "configreader-config-manager": "file:..",
         "dayjs": "^1.11.11",
         "fast-xml-parser": "^4.5.3",
         "react": "^18.2.0",

@@ -8,6 +8,9 @@
         "icon": [
             "icons/icon.ico",
             "icons/logo-sigmasquare.png"
+        ],
+        "resources": [
+            "../sample-workspace/config"
         ]
     },
     "build": {

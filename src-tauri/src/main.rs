@@ -706,6 +706,63 @@ fn atomic_replace_windows_friendly(tmp_path: &Path, target_path: &Path) -> Resul
     }
 }
 
+fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), String> {
+    if !src.exists() {
+        return Err(format!("Source directory does not exist: {}", src.display()));
+    }
+    if !src.is_dir() {
+        return Err(format!("Source path is not a directory: {}", src.display()));
+    }
+
+    fs::create_dir_all(dst).map_err(|e| format!("Failed to create dir {}: {}", dst.display(), e))?;
+
+    for entry in fs::read_dir(src).map_err(|e| format!("Failed to read dir {}: {}", src.display(), e))? {
+        let entry = entry.map_err(|e| format!("Failed to read dir entry: {}", e))?;
+        let src_path = entry.path();
+        let name = entry
+            .file_name()
+            .to_string_lossy()
+            .to_string();
+        let dst_path = dst.join(name);
+
+        if src_path.is_dir() {
+            copy_dir_recursive(&src_path, &dst_path)?;
+        } else if src_path.is_file() {
+            if let Some(parent) = dst_path.parent() {
+                fs::create_dir_all(parent)
+                    .map_err(|e| format!("Failed to create dir {}: {}", parent.display(), e))?;
+            }
+            fs::copy(&src_path, &dst_path)
+                .map_err(|e| format!("Failed to copy {} -> {}: {}", src_path.display(), dst_path.display(), e))?;
+        }
+    }
+
+    Ok(())
+}
+
+fn try_get_appdata_config_dir() -> Option<PathBuf> {
+    // Prefer APPDATA (Roaming). For many desktop apps, Roaming is acceptable.
+    // We intentionally avoid Tauri path APIs here to keep this command simple.
+    let appdata = std::env::var_os("APPDATA")?;
+    Some(PathBuf::from(appdata).join("ConfigManager").join("config"))
+}
+
+fn try_get_bundled_sample_config_dir(exe_dir: &Path) -> Option<PathBuf> {
+    // When bundled via tauri.conf.json `bundle.resources`, Tauri typically places
+    // resources next to the executable under a `resources/` folder.
+    let candidates = [
+        exe_dir.join("resources").join("config"),
+        exe_dir.join("..\\resources").join("config"),
+    ];
+
+    for p in candidates {
+        if p.exists() && p.is_dir() {
+            return Some(p);
+        }
+    }
+    None
+}
+
 fn write_atomic(target_path: &Path, content: &str) -> Result<(), String> {
     let tmp_path = PathBuf::from(format!("{}.tmp", target_path.to_string_lossy()));
 
@@ -1051,14 +1108,35 @@ fn default_workspace_root() -> Result<String, String> {
         .parent()
         .ok_or_else(|| "Failed to get exe parent directory".to_string())?;
 
-    // New semantics: workspaceRoot is the *config directory* itself.
-    // Prefer "<exe_dir>/config" if present; otherwise fallback to "<exe_dir>".
-    let config_dir = dir.join("config");
-    if config_dir.exists() && config_dir.is_dir() {
-        Ok(config_dir.to_string_lossy().to_string())
-    } else {
-        Ok(dir.to_string_lossy().to_string())
+    // Preferred: portable mode (config dir next to the executable).
+    let portable_config_dir = dir.join("config");
+    if portable_config_dir.exists() && portable_config_dir.is_dir() {
+        return Ok(portable_config_dir.to_string_lossy().to_string());
     }
+
+    // Otherwise: use a writable per-user directory and initialize it from bundled sample config.
+    if let Some(user_config_dir) = try_get_appdata_config_dir() {
+        if !user_config_dir.exists() {
+            // Create and optionally populate with sample config.
+            fs::create_dir_all(&user_config_dir).map_err(|e| {
+                format!(
+                    "Failed to create user config dir {}: {}",
+                    user_config_dir.display(),
+                    e
+                )
+            })?;
+
+            if let Some(sample_dir) = try_get_bundled_sample_config_dir(dir) {
+                // Best-effort copy; if it fails, we still keep the empty dir.
+                let _ = copy_dir_recursive(&sample_dir, &user_config_dir);
+            }
+        }
+
+        return Ok(user_config_dir.to_string_lossy().to_string());
+    }
+
+    // Fallback: exe directory (may be read-only in installed environments).
+    Ok(dir.to_string_lossy().to_string())
 }
 
 fn main() {

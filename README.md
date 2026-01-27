@@ -1,79 +1,160 @@
-# 通用跨平台配置管理器（Tauri）
+# ConfigManager
 
-这是按文档 4.1（Tauri + 复用现有 React UI）新建的可执行应用骨架。
+ConfigManager 是一个现代化的配置管理系统，提供 **配置文件可视化编辑** 的完整解决方案。项目基于 **Tauri + React**，支持 **JSON / XML** 配置文件，并提供 **Schema 驱动的动态表单生成**，同时保留源码编辑能力，适用于桌面端配置维护、交付与回滚。
 
-## 目录结构
+- 支持格式：JSON / XML
+- 驱动方式：Schema（本项目自定义的“groups schema”）
+- UI：动态表单 + 源码编辑双模式
+- 存储安全：保存前自动备份（history），并使用原子写入策略
 
-- `apps/config-manager/src-tauri/`：Rust（本地文件扫描/备份/原子写）
-- `apps/config-manager/frontend/`：独立前端（只做“编辑配置”），通过 Tauri commands 调用本地 Rust
+## 功能特性
 
-## 约定的工作区结构（被 Rust 命令使用）
+- **配置目录扫描与条目匹配**：扫描配置目录下的 `*.json` / `*.xml`，按前缀（basename）识别条目
+- **Schema 驱动表单**：根据 schema 渲染动态表单，支持分组、数组项模板、对象嵌套、字段校验、条件展示等
+- **无 Schema 也可用**：
+  - 若缺少 schema：前端会基于当前配置内容 **自动推导** 表单结构作为兜底
+  - 对 JSON：可一键 **生成默认 schema**（仅覆盖“自动生成”的 schema，不覆盖手写 schema）
+- **双编辑模式**：
+  - 表单模式：面向业务人员、减少出错
+  - 源码模式：面向工程人员，直接编辑原始文本
+- **历史版本与恢复**：每次保存前会在 `history/` 生成备份；支持“一键加载最新备份到编辑区”（不会自动写回磁盘，需再次点击保存）
+- **安全性**：后端对文件路径做 workspace 边界校验，避免越权读写
+
+## 技术栈
+
+- Tauri v2（Rust 后端 + WebView 前端容器）
+- Rust 2021
+- React 18 + Vite
+- Ant Design 5
+- XML：fast-xml-parser
+
+## 仓库结构
+
+- [frontend/](frontend/)：React 前端（动态表单、源码编辑、目录选择、调用 Tauri commands）
+- [src-tauri/](src-tauri/)：Rust 后端（扫描、读取、备份、原子写入、schema 生成）
+- [sample-workspace/](sample-workspace/)：示例工作区（用于快速验证）
+
+## 工作区（Workspace）约定
+
+应用需要一个“配置目录”（在 UI 里叫 `workspaceRoot`）。该目录通常 **直接包含**配置文件：
 
 ```text
-<workspace-root>/
-  config/
-    <prefix>.json | <prefix>.xml
-    history/
-    schemas/
-      <prefix>.schema.json
+<workspaceRoot>/
+  *.json | *.xml
   schemas/
     <prefix>.schema.json
+  history/
+    <prefix>__YYYYMMDD_HHMMSS_mmm.<ext>
 ```
 
-严格前缀匹配：两侧去掉扩展名后的 basename 必须完全相等。
+命名约定：
 
-本仓库内置一个可直接测试的工作区：`apps/config-manager/sample-workspace`。
+- 配置文件：`<prefix>.json` 或 `<prefix>.xml`
+- schema 文件：`schemas/<prefix>.schema.json`
+- 前缀严格匹配：`<prefix>` 必须与配置文件 basename 完全一致
 
-## 已实现的 Tauri Commands（MVP：文件系统侧）
+兼容规则（便于接入已有项目目录）：
 
-- `list_entries(workspace_root)`：扫描 `schemas/` 与 `config/`，按严格前缀匹配返回列表（排除 `config/history/`）
-- `read_entry(workspace_root, prefix)`：读取 schema/config 原文（含 format）
-- `save_entry_text(workspace_root, prefix, content)`：按原 config 文件路径写入文本；保存前先在 `config/history/` 备份；使用 tmp + replace 的原子写策略
+- 如果你在 `workspaceRoot` 下没有直接放 `*.json/*.xml`，但在 `workspaceRoot/config/` 下有配置文件，后端会自动回退到 `workspaceRoot/config/` 作为实际配置目录。
 
-## 开发运行（Windows）
+示例（仓库内置）：
 
-1) 先确保你的环境满足 Tauri 依赖（Rust toolchain + WebView2 等）。
+- 配置文件：[sample-workspace/config/algorithms.json](sample-workspace/config/algorithms.json)
+- schema 示例：[sample-workspace/config/schemas/algorithms.schema.json](sample-workspace/config/schemas/algorithms.schema.json)
 
-2) 安装依赖：
+## Schema 说明（groups schema）
 
-- 在 `apps/config-manager`：`npm install`
-- 在 `apps/config-manager/frontend`：`npm install`
+本项目使用“分组（groups）”模型来描述表单布局，不是标准 JSON Schema。
 
-3) 启动：
+核心概念：
 
-- 在 `apps/config-manager` 下执行：`npm run dev`
+- `groups[]`：表单分组（可折叠、可用 tabs/collapse/card 呈现）
+- `fields[]`：字段定义（string/number/boolean/array/object 等）
+- `group.type = array`：数组分组，支持 `ui.itemTemplate` 描述每一项的字段/子分组
+- `field.validation`：常见校验（required、min/max、minLength/maxLength、pattern、enum）
+- `field.dependsOn`：条件展示（基于另一个字段的值进行显示/隐藏）
+
+推荐从示例 schema 入手理解格式：
+
+- [sample-workspace/config/schemas/algorithms.schema.json](sample-workspace/config/schemas/algorithms.schema.json)
+
+## 开发与运行（Windows）
+
+### 前置条件
+
+- Node.js（建议 18+）
+- Rust toolchain（stable）
+- Tauri 运行/构建依赖（Windows 通常需要 WebView2 Runtime、VS Build Tools 等）
+
+> Tauri 的系统依赖会随平台变化；若你第一次使用 Tauri，建议先确认本机已满足官方环境要求。
+
+### 安装依赖
+
+在仓库根目录：
+
+```bash
+npm install
+```
+
+在前端目录：
+
+```bash
+npm --prefix frontend install
+```
+
+### 启动开发模式
+
+```bash
+npm run dev
+```
 
 该命令会：
-- 自动在 `apps/config-manager/frontend` 启动 Vite（5174）
-- 启动 Tauri Shell 并加载 `http://localhost:5174`
 
-> 本前端已直接使用 Tauri commands（不依赖 `http://localhost:8200`）。
+- 先启动 `frontend` 的 Vite 开发服务器（端口 5174）
+- 再启动 Tauri 开发壳并加载 `http://localhost:5174`
 
-## 重要说明：为什么双击 debug exe 会“无法访问此页面”
+### 打包构建
 
-你如果直接打开 `apps/config-manager/src-tauri/target/debug/config_manager.exe`，大概率会看到“嗯… 无法访问此页面”。
+```bash
+npm run build
+```
 
-原因：这个 exe 通常来自 `tauri dev` 的开发构建，它会按 [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json) 里的 `build.devUrl` 去加载前端页面（当前是 `http://localhost:5174`）。
-当你没有同时运行 Vite 开发服务器时，它自然就加载失败。
+构建会先输出 `frontend/dist`，然后由 Tauri 打包生成可分发产物（默认位于 `src-tauri/target/release/bundle/`）。
 
-这不代表“需要常驻后台服务才能发布”，而只是开发阶段的热更新模式。
+## 使用指南
 
-## 打包为真正的独立可执行文件（不需要 Vite/后台）
+1. 启动应用
+2. 在顶部输入框中填写配置目录（`workspaceRoot`），或点击“浏览…”选择目录
+3. 点击“加载”，左侧将出现识别到的配置条目
+4. 选择条目后：
+   - 通过“表单”页编辑（有 schema 时使用 schema；无 schema 时尝试推导）
+   - 或切换到“源码”页直接编辑文本
+5. 点击“保存”：
+   - 保存前会在 `history/` 写入备份
+   - 写入采用原子替换策略（tmp + replace）
 
-在 `apps/config-manager` 下执行：
+### 生成/更新默认 schema（JSON）
 
-- `npm run build`
+- 当检测到 schema 缺失且存在 JSON 配置时，应用会提示是否生成默认 schema
+- 也可点击“更新默认 schema”批量生成/更新
 
-它会先构建前端到 `apps/config-manager/frontend/dist`，然后打包出可分发的安装包/可执行文件。
+注意：仅会覆盖“自动生成”的 schema（`createdBy=config-manager` 且描述以“自动生成”开头），不会覆盖手写 schema。
 
-产物位置（以 Tauri 默认输出为准，实际以你机器为准）：
-- 可直接运行的 release 二进制：`apps/config-manager/src-tauri/target/release/config_manager.exe`
-- 安装包等 bundle：`apps/config-manager/src-tauri/target/release/bundle/`
+## 后端命令（Tauri Commands）
 
-打包后的应用会加载内置的 `frontend/dist`（`build.frontendDist`），因此**不需要**再启动 Vite，也不需要任何本地 HTTP 服务进程。
+前端通过 `@tauri-apps/api` 调用以下命令：
 
-## 关于“单文件”与发布拷贝方式
+- `list_entries(workspaceRoot)`：扫描条目（配置存在即可列出；schema 可缺省）
+- `read_entry(workspaceRoot, prefix)`：读取 schema/config 原文
+- `save_entry_text(workspaceRoot, prefix, content)`：保存文本（history 备份 + 原子写）
+- `read_latest_history(workspaceRoot, prefix)`：读取最新备份
+- `schema_setup_suggestion(workspaceRoot)`：判断是否应提示生成 schema
+- `generate_default_schemas(workspaceRoot)`：为 JSON 配置生成/更新默认 schema
+- `default_workspace_root()`：给出默认配置目录（发布时通常为 `<exe_dir>/config`）
 
-- 开发目录里的 `src-tauri/target/**` 下会有很多编译中间产物（你截图里的“一串文件/文件夹”），**不要**把整个目录当成发布物拷贝到其它项目目录。
-- 如果你想要“拷贝就能跑”的最小形态：通常只需要 `apps/config-manager/src-tauri/target/release/config_manager.exe`（以及系统已安装 WebView2 Runtime）。
-- 更推荐的发布方式：使用 `apps/config-manager/src-tauri/target/release/bundle/` 下生成的安装包（例如 NSIS `.exe` / MSI），它本身就是一个单文件安装包，安装后不会把构建中间产物散落到你的项目目录。
+## License
+
+本项目使用 **GNU Affero General Public License v3.0 或更高版本（AGPL-3.0-or-later）**。
+
+- 详见 [LICENSE](LICENSE)
+
