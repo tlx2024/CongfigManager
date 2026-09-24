@@ -7,7 +7,7 @@
 - `frontend/`：React 18、Vite、Ant Design 5；负责动态表单、源码编辑和 Schema 管理。
 - `src-tauri/`：Tauri 2 与 Rust；负责目录扫描、读取、版本记录、备份和原子写入。
 - `sample-workspace/`：供开发和界面预览使用的示例配置。
-- `docs/site/`：静态介绍页源码；当前没有自动部署。
+- `docs/site/`：静态介绍页源码；`main` 上更新站点文件时由 Pages 工作流部署。
 
 ## 本地运行
 
