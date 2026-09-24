@@ -1,4 +1,4 @@
-# ConfigManager - 统一配置管理系统
+# ConfigManager - Unified Configuration Management System
 
 <div align="center">
 
@@ -10,209 +10,211 @@
 [![CI Build](https://github.com/tlx2024/CongfigManager/actions/workflows/ci.yml/badge.svg)](https://github.com/tlx2024/CongfigManager/actions/workflows/ci.yml)
 [![GitHub Pages](https://img.shields.io/badge/docs-GitHub%20Pages-orange.svg)](https://tlx2024.github.io/CongfigManager/)
 
-**高性能、跨平台的 JSON / XML 配置文件可视化管理与安全版本控制桌面工作站**
+**High-performance, cross-platform desktop workstation for visual JSON / XML configuration management and secure version control**
 
-[快速开始](#-快速开始) · [下载中心](#-下载与安装) · [功能特性](#-功能特性) · [界面预览](#-界面预览) · [架构设计](#-架构设计) · [规范与示例](#-工作区与-schema-规范) · [开发与构建](#-开发与构建) · [参与贡献](#-参与贡献)
+[English](README.md) · [简体中文](README-CN.md)
+
+[Quick Start](#-quick-start) · [Download & Installation](#-download--installation) · [Features](#-features) · [Screenshots](#-screenshots) · [Architecture](#-architecture) · [Workspace & Schema](#-workspace--schema-specifications) · [Development & Build](#-development--build) · [Contributing](#-contributing)
 
 </div>
 
 ---
 
-## 📖 项目简介
+## 📖 Overview
 
-**ConfigManager** 是一款专为工程研发、算法调优、自动化系统及多环境部署打造的现代化跨平台配置管理桌面应用。
+**ConfigManager** is a modern, cross-platform desktop application designed for engineering R&D, algorithm tuning, automated systems, and multi-environment deployments.
 
-在复杂的项目工程中，配置文件往往四散各处、格式繁多。手动使用文本编辑器修改 JSON 或 XML 容易产生语法错误、漏填必要参数，且缺乏历史版本追踪与快速回滚机制。ConfigManager 基于 **Tauri 2 + Rust + React 18** 架构构建，用户只需选定本地配置目录，即可在统一的操作界面中实现配置集中管理、表单与源码双向同步编辑、Schema 驱动的智能校验，以及保存前的安全快照备份与双轨版本控制。
+In complex engineering projects, configuration files are often scattered across various directories and formats. Manually editing JSON or XML files with plain text editors frequently introduces syntax errors and missing required fields, while lacking history version tracking and quick rollback mechanisms. Built on a **Tauri 2 + Rust + React 18** architecture, ConfigManager allows users to select a local configuration directory to achieve centralized configuration management, bidirectional synchronized form and source editing, schema-driven intelligent validation, safe pre-save snapshot backups, and dual-track version control—all within a clean, unified interface.
 
-### 🎯 适用场景
+### 🎯 Use Cases
 
-- ✅ **算法与系统参数调优**：计算机视觉、机器人控制、AI 推理插件等复杂参数的可视化表单调节。
-- ✅ **应用程序与服务配置维护**：桌面客户端、嵌入式应用、微服务本地配置的集中化浏览与安全编辑。
-- ✅ **配置防呆与团队规范约束**：基于 Schema 设定取值范围、枚举选项、正则格式与必填约束，杜绝人为手写配置失误。
-- ✅ **配置版本追溯与一键回滚**：生产与实验场景下关键配置的修改快照归档，出现异常时可快速回滚至任意历史版本。
-- ✅ **涉密与高安全离线环境**：100% 纯本地运行与文件 IO，零网络中转、零远程遥测，保障企业和科研核心数据绝对安全。
+- ✅ **Algorithm & System Tuning**: Visual parameter adjustments for computer vision, robotics control, AI inference plugins, and complex configuration sets.
+- ✅ **Application & Service Configuration Maintenance**: Centralized browsing and secure editing for desktop clients, embedded systems, and local microservice configurations.
+- ✅ **Error-Proofing & Team Standards**: Define value boundaries, enum choices, regex formats, and required constraints via Schemas to eliminate human editing mistakes.
+- ✅ **Version Auditing & Instant Rollback**: Archive snapshot backups before saving in production or testing environments, allowing instant one-click rollback to any historical version if anomalies arise.
+- ✅ **Air-Gapped & High-Security Offline Environments**: 100% local execution and local file I/O with zero network relays and zero remote telemetry, safeguarding sensitive enterprise and research data.
 
-### ⚡ 核心优势
+### ⚡ Key Advantages
 
-| 特性维度 | 说明 |
-|----------|------|
-| 🚀 **极速轻量** | 采用 Tauri 2 + Rust 原生核心，毫秒级快速冷启动，内存与 CPU 资源占用远低于传统 Electron 应用 |
-| 📝 **双视图编辑** | 提供结构化表单视图（防呆交互、直观可读）与纯文本源码视图（精细控制、完整展示），两者无缝同步 |
-| 📋 **Schema 驱动** | 基于针对表单优化的 Groups Schema 体系，支持分组分栏、字段范围校验、条件联动展示与动态数组 |
-| 🪄 **智能逆向推导** | 无需提前手写 Schema，系统可自动从现有 JSON/XML 配置文件推导出表单结构，并可一键生成规范 Schema |
-| 🎨 **可视化设计器** | 内置独立的 Schema 设计工作台，拖拽与交互式编排字段属性与校验规则，所见即所得实时预览表单 |
-| 🛡️ **双轨版本控制** | 配置文件与 Schema 文件独立版本追踪；保存前强制生成历史快照，支持无损加载比对与安全恢复 |
-| 🔒 **非侵入式元数据** | 版本号与变更元信息独立存放于 `.meta/` 目录，绝不篡改或在原始 JSON/XML 中注入非标准字段 |
-| 💻 **跨平台免依赖** | 原生覆盖 Windows x64、macOS (Apple Silicon & Intel) 以及主流 Linux 发行版，终端用户无需安装 Node/Rust |
+| Dimension | Description |
+|---|---|
+| 🚀 **Blazing Fast & Lightweight** | Native Tauri 2 + Rust core delivers millisecond cold starts with substantially lower RAM and CPU consumption than Electron |
+| 📝 **Dual-View Editing** | Seamlessly switch between structured Form View (error-proof, intuitive widgets) and raw Source View (fine-grained control, complete view), with bidirectional synchronization |
+| 📋 **Schema-Driven** | Purpose-built Groups Schema tailored for form presentation, featuring grouped tabs, range validation, conditional visibility, and dynamic nested arrays |
+| 🪄 **Smart Reverse Inference** | No need to write schemas in advance; the system automatically analyzes existing JSON/XML files, infers form layouts, and generates standard schemas with one click |
+| 🎨 **Visual Schema Studio** | Built-in visual schema designer to orchestrate fields, types, constraints, and layouts interactively with real-time form preview |
+| 🛡️ **Dual-Track Versioning** | Independent version tracking for config files and schema files; automatic pre-save history snapshots with non-destructive diff inspection and safe restoration |
+| 🔒 **Non-Invasive Metadata** | Version numbers and change logs reside strictly in `.meta/` directories, never altering or injecting non-standard fields into original JSON/XML files |
+| 💻 **Zero-Dependency Cross-Platform** | Native packages for Windows x64, macOS (Apple Silicon & Intel), and major Linux distributions; end users do not need Node.js or Rust installed |
 
 ---
 
-## 📦 下载与安装
+## 📦 Download & Installation
 
-ConfigManager 预编译客户端由 GitHub Actions 多平台矩阵自动化构建并发布。终端用户**无需准备开发环境或安装运行时**，直接下载对应平台的安装包即可。
+Pre-compiled ConfigManager binaries are automatically built and released across platforms via GitHub Actions. End users **do not need a development environment or runtime installed**—simply download the appropriate package for your operating system.
 
-> **当前正式版本：[`v0.1.0`](https://github.com/tlx2024/CongfigManager/releases/tag/v0.1.0)**
-> 所有安装包已与 GitHub Releases 官方发布资产直接对齐。
+> **Current Official Release: [`v0.1.0`](https://github.com/tlx2024/CongfigManager/releases/tag/v0.1.0)**
+> All download packages align directly with official GitHub Releases assets.
 
-| 操作系统 | 硬件架构 | 安装包类型 | 安装包说明 | 官方直达下载链接 (v0.1.0) |
+| OS | Architecture | Package Type | Description | Direct Download Link (v0.1.0) |
 |---|---|---|---|---|
-| **Windows** | x64 (64位) | NSIS 安装程序 (`.exe`) | **推荐**，双击一键引导安装 | [⬇️ 下载 EXE 安装包](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64-setup.exe) |
-| **Windows** | x64 (64位) | Windows Installer (`.msi`) | 企业环境静默部署与组策略分发 | [⬇️ 下载 MSI 安装包](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64_en-US.msi) |
-| **macOS** | Apple Silicon | DMG 镜像 (`.dmg`) | 适配 M1 / M2 / M3 / M4 芯片 Mac | [⬇️ 下载 ARM64 DMG](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_aarch64.dmg) |
-| **macOS** | Intel x64 | DMG 镜像 (`.dmg`) | 适配 Intel 架构 Mac 电脑 | [⬇️ 下载 Intel DMG](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64.dmg) |
-| **Linux** | x64 (amd64) | AppImage (`.AppImage`) | **推荐**，独立免安装单文件，通用所有发行版 | [⬇️ 下载 AppImage](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_amd64.AppImage) |
-| **Linux** | x64 (amd64) | Debian 软件包 (`.deb`) | 适配 Ubuntu、Debian 等衍生系统 | [⬇️ 下载 DEB 安装包](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_amd64.deb) |
+| **Windows** | x64 (64-bit) | NSIS Installer (`.exe`) | **Recommended**, guided setup wizard | [⬇️ Download EXE Installer](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64-setup.exe) |
+| **Windows** | x64 (64-bit) | Windows Installer (`.msi`) | Enterprise silent deployment & GPO | [⬇️ Download MSI Installer](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64_en-US.msi) |
+| **macOS** | Apple Silicon | DMG Image (`.dmg`) | Optimized for M1 / M2 / M3 / M4 Macs | [⬇️ Download ARM64 DMG](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_aarch64.dmg) |
+| **macOS** | Intel x64 | DMG Image (`.dmg`) | For Intel-based Macs | [⬇️ Download Intel DMG](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64.dmg) |
+| **Linux** | x64 (amd64) | AppImage (`.AppImage`) | **Recommended**, standalone portable file for all distros | [⬇️ Download AppImage](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_amd64.AppImage) |
+| **Linux** | x64 (amd64) | Debian Package (`.deb`) | For Ubuntu, Debian, and derivatives | [⬇️ Download DEB Package](https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_amd64.deb) |
 
-*也可以访问 [GitHub Releases 页面](https://github.com/tlx2024/CongfigManager/releases) 或 [GitHub Pages 下载主页](https://tlx2024.github.io/CongfigManager/#download) 查看版本发布日志。*
+*You can also visit the [GitHub Releases Page](https://github.com/tlx2024/CongfigManager/releases) or the [GitHub Pages Download Portal](https://tlx2024.github.io/CongfigManager/#download) for detailed release logs.*
 
-### 💡 平台使用贴士
+### 💡 Platform Tips
 
-- **macOS 用户**：
-  当前构建使用临时签名，未进行 Apple 公证。首次打开若弹出“无法打开，因为无法验证开发者”或“应用已损坏”警告，请前往系统 **「系统设置」→「隐私与安全性」** 中点击 **「仍要打开」**；或在终端中运行以下命令解除隔离属性：
+- **macOS Users**:
+  The current build uses ad-hoc signing without Apple notarization. If macOS shows a warning stating "cannot be opened because the developer cannot be verified" or "the application is damaged", go to **System Settings → Privacy & Security** and click **Open Anyway**, or run the following command in Terminal to clear quarantine attributes:
   ```bash
   sudo xattr -cr /Applications/Config\ Manager.app
   ```
-- **Linux 用户**：
-  下载 `.AppImage` 文件后，添加可执行权限即可直接运行：
+- **Linux Users**:
+  After downloading the `.AppImage` file, grant executable permissions to launch it directly:
   ```bash
   chmod +x ConfigReader.Config.Manager_0.1.0_amd64.AppImage
   ./ConfigReader.Config.Manager_0.1.0_amd64.AppImage
   ```
-  若使用 `.deb` 包，通过 `sudo dpkg -i ConfigReader.Config.Manager_0.1.0_amd64.deb` 安装。
+  If using the `.deb` package, install via `sudo dpkg -i ConfigReader.Config.Manager_0.1.0_amd64.deb`.
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-只需简单四步，即可开始安全管理你的配置文件：
+Get started managing your configuration files safely in four simple steps:
 
 ```
 ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│  1. 启动应用     │ ──> │  2. 载入工作区   │ ──> │  3. 表单/源码修改 │ ──> │  4. 备份与安全保存│
-│  下载安装即开即用 │     │  选择配置本地目录 │     │  实时校验防呆防错 │     │  历史快照原子写入│
+│  1. Launch App   │ ──> │ 2. Load Workspace│ ──> │ 3. Form / Source │ ──> │ 4. Safe Save &   │
+│  Ready to use    │     │ Select local dir │     │ Live validation  │     │ Atomic backup    │
 └──────────────────┘     └──────────────────┘     └──────────────────┘     └──────────────────┘
 ```
 
-1. **启动程序**：首次打开应用时，系统已自动内置一套可交互的算法示例工作区（含 `algorithms.json` 与匹配 Schema），方便你即刻体验各项功能。
-2. **选择工作区**：点击顶部「浏览…」选择你实际项目的配置目录，再点击「加载」。配置文件可直接放在该根目录下，或放在其子目录 `config/` 下（支持 `*.json` 与 `*.xml` 格式）。
-3. **可视化编辑**：在左侧列表中点击选择配置文件：
-   - 切换到「**表单**」标签：以结构化卡片、滑块、开关、下拉菜单的形式修改参数，享受即时范围校验与动态联动保护；
-   - 切换到「**源码**」标签：查看或精确微调底层原始文本，适合批量文本粘贴与底层结构核验。
-4. **安全保存与回滚**：确认修改后点击「保存配置」。后端在覆写前会自动将原版本快照备份至 `history/` 并递增版本。若后续需要找回旧参数，在「历史」标签中可随时载入任意历史版本，核对无误后再决定保存恢复。
+1. **Launch the Application**: On first launch, the app includes a built-in interactive algorithm sample workspace (with `algorithms.json` and matching Schema) so you can explore all features right away.
+2. **Select Workspace**: Click "Browse..." in the top toolbar to choose your project's configuration directory, then click "Load". Configuration files can be placed directly in the root or inside a `config/` subdirectory (supports `*.json` and `*.xml`).
+3. **Visual Editing**: Select a configuration file from the sidebar list:
+   - Switch to the **Form** tab: Modify parameters through structured cards, sliders, switches, and dropdowns with real-time range validation and dynamic conditional visibility;
+   - Switch to the **Source** tab: Inspect or fine-tune raw text directly, ideal for bulk pasting or reviewing low-level formatting.
+4. **Safe Save & Rollback**: Once satisfied, click "Save Config". The backend automatically creates a timestamped snapshot backup in `history/` and increments the version before overwriting. If you need to recover previous parameters, simply switch to the "History" tab to load and inspect any past snapshot before restoring it.
 
 ---
 
-## 🖥️ 界面预览
+## 🖥️ Screenshots
 
-以下界面截图均基于 ConfigManager 运行真实项目内置示例截取：
+The following screenshots are captured from ConfigManager running the project's built-in sample workspace:
 
-### 1. 结构化表单编辑界面
-*根据 Schema 分组渲染输入控件，支持数值范围限制、开关控件、联动条件展示与数组条目管理：*
-![表单编辑示例配置](docs/screenshots/main-form.png)
+### 1. Structured Form Editor View
+*Renders input controls grouped by Schema, supporting numerical boundaries, toggles, conditional visibility, and array management:*
+![Form Editor Example](docs/screenshots/main-form.png)
 
-### 2. 原生源码编辑视图
-*提供完整的代码查看与编辑环境，保留文本缩进与语法格式，适合高精细修改：*
-![源码编辑示例配置](docs/screenshots/source-editor.png)
+### 2. Native Source Editor View
+*Provides a complete code inspection and editing environment preserving indentation and syntax, tailored for fine-grained changes:*
+![Source Editor Example](docs/screenshots/source-editor.png)
 
-### 3. 可视化 Schema 设计工作室
-*无需手写复杂 JSON，以可视化交互定义字段属性、校验规则、默认值与分组布局，并支持表单实时渲染预览：*
-![Schema 结构编辑界面](docs/screenshots/schema-editor.png)
-
----
-
-## ✨ 功能特性
-
-### 1️⃣ 双视图协同编辑 (Form & Source Dual View)
-
-- **动态智能表单**：根据配置类型与 Schema 规范自动渲染表单控件，涵盖字符串输入框、数值微调器/滑动条、布尔开关、枚举单选/下拉框、颜色选择器以及动态可增删的嵌套数组结构。
-- **源码模式直接控制**：随时切换到源码编辑视图，实时查阅原汁原味的 JSON 或 XML 文本。
-- **编辑区无损隔离**：在前端编辑区的所有临时改动均保存在内存中，只有显式点击「保存配置」时才会持久化，避免误编辑导致原文件受损。
-
-### 2️⃣ Schema 驱动与智能逆向推导 (Schema Engine)
-
-- **零门槛开箱即用**：即使你的项目只有原始配置文件、完全没有编写过 Schema，ConfigManager 也会在载入时自动分析数据结构，逆向推导出一套默认的动态表单，保证即开即改。
-- **一键生成标准 Schema**：检测到缺少 Schema 时，系统提供一键生成功能，自动提取字段层级并在 `schemas/` 下创建基础 Schema，已有手写 Schema 受到绝对保护，绝不强制覆盖。
-- **Groups Schema 规范体系**：采用面向现代化表单呈现设计的 Groups 规范，提供比传统标准 JSON Schema 更加友好直观的分组布局（`groups`）、字段展示条件（`conditions`）和交互控制。
-
-### 3️⃣ 内置 Schema 可视化设计工作室 (Schema Studio)
-
-- **纯图形化编排**：左侧统一管理工作区内所有 Schema 文件，右侧提供分组创建、字段增删、类型调整、必填与范围规则设定的可视化工作流。
-- **即时交互式预览**：设计 Schema 的同时，右侧控制台实时渲染生成的最终动态表单，可直接测试交互逻辑与联动条件是否符合预期。
-- **独立版本历史**：Schema 文件本身也享有独立的版本追踪与历史备份机制，避免多人协作时表单定义被误改。
-
-### 4️⃣ 双轨版本控制与安全写入保护 (Safe Versioning & Atomic Write)
-
-- **自动快照备份**：每一次点击保存，后端 Rust 引擎首先将当前磁盘上的文件按时间戳和版本号完整备份到 `history/` 目录下。
-- **独立元数据管理**：版本号、最后更新人、更新时间戳与配置哈希记录在独立的 `.meta/` 目录中，确保输出的业务配置文件保持纯粹干净，绝无第三方注释或脏属性。
-- **原子替换写入 (Atomic Write)**：底层保存采用临时文件写入校验成功后再进行文件原子重命名（Atomic Rename）策略，即使遭遇系统崩溃、意外断电，也能杜绝文件写入中断导致的配置损坏。
-- **路径遍历安全防御**：Rust 后端严格校验所有文件读写前缀与相对路径，有效抵御跨目录非法访问风险。
+### 3. Visual Schema Studio
+*Define field attributes, validation rules, default values, and group layouts visually without hand-crafting complex JSON, featuring real-time form preview:*
+![Schema Structure Editor](docs/screenshots/schema-editor.png)
 
 ---
 
-## 📐 架构设计
+## ✨ Features
 
-### 1. 系统总体架构
+### 1️⃣ Dual-View Collaborative Editing (Form & Source Dual View)
+
+- **Dynamic Smart Forms**: Automatically renders controls based on configuration types and Schema specifications, including string inputs, number spinners/sliders, boolean switches, enum radios/dropdowns, color pickers, and dynamic add/remove array items.
+- **Direct Source Mode Control**: Switch to the raw source editor at any time to review and edit original JSON or XML markup.
+- **Lossless In-Memory Isolation**: All temporary changes in the editor are kept in memory and only written to disk upon clicking "Save Config", preventing accidental corruption of existing files.
+
+### 2️⃣ Schema-Driven & Smart Reverse Inference (Schema Engine)
+
+- **Zero-Barrier Out of the Box**: Even if your project only has raw config files and no schemas, ConfigManager automatically analyzes data structures upon loading and infers a default dynamic form layout.
+- **One-Click Standard Schema Generation**: When a missing schema is detected, the system extracts field hierarchies and creates a baseline schema under `schemas/`. Existing custom schemas are strictly protected and never overwritten.
+- **Groups Schema Specification**: Employs the form-oriented Groups Schema standard, offering cleaner grouping (`groups`), conditional display rules (`conditions`), and interaction control compared to traditional JSON Schema.
+
+### 3️⃣ Built-in Visual Schema Studio (Schema Studio)
+
+- **Pure Graphical Orchestration**: Manage workspace Schema files from the left pane while visually editing groups, adding/removing fields, tweaking types, and configuring required/boundary rules in the center canvas.
+- **Instant Interactive Preview**: As you design the schema, the right preview panel live-renders the resulting dynamic form, allowing immediate verification of field layouts and conditional rules.
+- **Independent Version History**: Schema files feature their own version tracking and snapshot backup mechanism, safeguarding definitions during multi-developer collaboration.
+
+### 4️⃣ Dual-Track Versioning & Safe Atomic Write (Safe Versioning & Atomic Write)
+
+- **Automatic Snapshot Backups**: Prior to saving changes, the Rust backend automatically archives the current disk file into `history/` tagged with timestamp and version number.
+- **Non-Invasive Metadata Management**: Version numbers, last updater, timestamps, and content hashes are stored in a dedicated `.meta/` directory, keeping business config files pure without third-party comments or injected metadata.
+- **Atomic Write & Replace (Atomic Write)**: File persistence writes to a temporary file first, validates integrity, and performs an atomic rename, preventing file corruption even during unexpected crashes or power failures.
+- **Path Traversal Defense**: The Rust backend strictly validates file paths against directory traversal attacks, ensuring file operations remain securely contained within the workspace.
+
+---
+
+## 📐 Architecture
+
+### 1. System Architecture
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                         ConfigManager Desktop                          │
 ├────────────────────────────────────────────────────────────────────────┤
-│  前端展示层 (React 18 + TypeScript + Ant Design 5 + Vite)                │
-│  ├── 动态表单引擎 (DynamicForm)       ── 表单渲染、控件交互、条件联动     │
-│  ├── 源码编辑模块 (SourceEditor)      ── 语法高亮、文本校验、双向同步     │
-│  ├── Schema 设计器 (SchemaEditor)    ── 可视化字段编排、实时效果预览     │
-│  └── 差异对比与历史 (Diff & History)   ── 快照对比、版本回滚、审计记录     │
+│  Frontend Presentation Layer (React 18 + TypeScript + Ant Design 5 + Vite) │
+│  ├── Dynamic Form Engine (DynamicForm)  ── Form rendering, controls, conditions │
+│  ├── Source Editor Module (SourceEditor) ── Highlighting, validation, two-way sync │
+│  ├── Schema Studio (SchemaEditor)       ── Visual orchestration, live preview │
+│  └── Diff & History                     ── Snapshots, rollback, audit log    │
 ├────────────────────────────────────────────────────────────────────────┤
-│  IPC 通信网桥 (@tauri-apps/api/core)                                   │
+│  IPC Communication Bridge (@tauri-apps/api/core)                       │
 ├────────────────────────────────────────────────────────────────────────┤
-│  原生核心层 (Tauri 2 + Rust Core)                                      │
-│  ├── 工作区与文件扫描器              ── 智能探测 JSON/XML 与 config 目录 │
-│  ├── 安全读写引擎 (Safe IO Engine)    ── 原子写入 (tempfile)、路径穿越防御│
-│  ├── Schema 逆向推导引擎             ── 从配置数据自动推断结构生成 Schema│
-│  ├── 版本与元数据管理 (.meta)         ── 配置与 Schema 双轨独立版本记录   │
-│  └── 历史快照归档服务 (history/)     ── 自动生成带时间戳快照与回滚服务   │
+│  Native Core Layer (Tauri 2 + Rust Core)                               │
+│  ├── Workspace & File Scanner           ── Detect JSON/XML & config directory│
+│  ├── Safe IO Engine                     ── Atomic write (tempfile), traversal guard│
+│  ├── Schema Reverse Inference Engine    ── Infer structure & generate schemas│
+│  ├── Version & Metadata (.meta)         ── Independent dual-track versioning │
+│  └── History Snapshot Service (history/)── Timestamped backups & rollback    │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 2. 工作区文件结构规范
+### 2. Workspace File Structure Conventions
 
-ConfigManager 遵循清晰、非侵入式的文件组织约定。一个标准配置工作区目录结构如下：
+ConfigManager follows a clear, non-invasive file organization pattern. A standard configuration workspace is structured as follows:
 
 ```text
-workspace_root/                   # 工作区根目录（或放置于 config/ 子目录下）
-├── algorithms.json               # 业务配置文件 (JSON 格式)
-├── device_settings.xml           # 业务配置文件 (XML 格式)
+workspace_root/                   # Workspace root (or inside a config/ subdirectory)
+├── algorithms.json               # Business configuration file (JSON format)
+├── device_settings.xml           # Business configuration file (XML format)
 │
-├── schemas/                      # 对应的 Schema 规则定义目录
-│   ├── algorithms.schema.json    # algorithms.json 对应的自定义 Groups Schema
+├── schemas/                      # Schema definition directory
+│   ├── algorithms.schema.json    # Custom Groups Schema for algorithms.json
 │   └── device_settings.schema.json
 │
-├── history/                      # 变更历史快照归档（保存时自动生成）
+├── history/                      # History snapshot archives (auto-generated on save)
 │   ├── algorithms.json.1737600000.bak
 │   └── algorithms.schema.json.1737600000.bak
 │
-└── .meta/                        # 内部独立版本元数据（不修改业务配置文件本身）
+└── .meta/                        # Internal version metadata (does not alter config files)
     ├── algorithms.json.meta.json
     └── algorithms.schema.json.meta.json
 ```
 
-### 3. 技术栈清单
+### 3. Tech Stack Matrix
 
-| 分层 | 技术 / 库 | 用途与定位 |
+| Layer | Technology / Library | Purpose & Role |
 |---|---|---|
-| **桌面底座** | [Tauri 2.0](https://tauri.app/) | 轻量化、高安全性的跨平台桌面运行环境与原生沙箱 |
-| **底层核心** | [Rust 1.75+](https://www.rust-lang.org/) | 高性能文件 IO、原子操作、路径安全校验与强类型解析 |
-| **前端框架** | [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) | 组件化视图架构、类型安全与可靠的状态管理 |
-| **UI 设计系统** | [Ant Design 5](https://ant.design/) | 现代化企业级组件库，驱动表单交互、抽屉与布局 |
-| **构建工具** | [Vite 5](https://vitejs.dev/) | 极速前端热重载开发服务器与 Rollup 打包引擎 |
-| **格式处理** | `serde_json` + `quick-xml` | 高性能流式 JSON 与 XML 序列化/反序列化 |
-| **持续集成** | GitHub Actions | 跨平台自动化矩阵构建 (Windows/macOS/Linux) 与自动发布 |
+| **Desktop Base** | [Tauri 2.0](https://tauri.app/) | Ultra-lightweight, secure cross-platform desktop runtime and native sandbox |
+| **Native Core** | [Rust 1.75+](https://www.rust-lang.org/) | High-performance file I/O, atomic operations, path validation, and strict typing |
+| **Frontend Framework** | [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) | Component-based view architecture, type safety, and predictable state management |
+| **UI Design System** | [Ant Design 5](https://ant.design/) | Modern enterprise component library powering forms, drawers, and layouts |
+| **Build Tool** | [Vite 5](https://vitejs.dev/) | High-speed frontend development server with HMR and Rollup bundler |
+| **Format Processing** | `serde_json` + `quick-xml` | High-performance streaming JSON and XML serialization/deserialization |
+| **Continuous Integration** | GitHub Actions | Automated cross-platform matrix builds (Windows/macOS/Linux) and releases |
 
 ---
 
-## 🌟 工作区与 Schema 规范
+## 🌟 Workspace & Schema Specifications
 
-### 示例 1: 业务配置文件 (`algorithms.json`)
+### Example 1: Business Configuration File (`algorithms.json`)
 
 ```json
 {
@@ -227,28 +229,28 @@ workspace_root/                   # 工作区根目录（或放置于 config/ �
 }
 ```
 
-### 示例 2: 对应的 Groups Schema 定义 (`schemas/algorithms.schema.json`)
+### Example 2: Corresponding Groups Schema Definition (`schemas/algorithms.schema.json`)
 
 ```json
 {
-  "name": "圆形检测算法配置",
-  "description": "定义圆形检测算法的关键超参数与模型路径",
+  "name": "Circle Detection Algorithm Configuration",
+  "description": "Defines hyperparameters and model path for circle detection",
   "groups": [
     {
       "id": "basic",
-      "title": "基础参数",
-      "description": "算法启停与基础信息",
+      "title": "Basic Parameters",
+      "description": "Algorithm toggle and basic info",
       "fields": [
         {
           "key": "algorithm.name",
-          "label": "算法标识",
+          "label": "Algorithm Identifier",
           "type": "string",
           "required": true,
-          "description": "算法唯一名称标识"
+          "description": "Unique algorithm name identifier"
         },
         {
           "key": "algorithm.enabled",
-          "label": "启用算法",
+          "label": "Enable Algorithm",
           "type": "boolean",
           "defaultValue": true
         }
@@ -256,8 +258,8 @@ workspace_root/                   # 工作区根目录（或放置于 config/ �
     },
     {
       "id": "detection",
-      "title": "检测阈值控制",
-      "description": "仅在算法处于启用状态时调节",
+      "title": "Detection Thresholds",
+      "description": "Adjustable only when algorithm is enabled",
       "conditions": [
         {
           "field": "algorithm.enabled",
@@ -268,25 +270,25 @@ workspace_root/                   # 工作区根目录（或放置于 config/ �
       "fields": [
         {
           "key": "algorithm.minRadius",
-          "label": "最小检测半径 (px)",
+          "label": "Min Detection Radius (px)",
           "type": "number",
           "validation": { "min": 1, "max": 500 }
         },
         {
           "key": "algorithm.maxRadius",
-          "label": "最大检测半径 (px)",
+          "label": "Max Detection Radius (px)",
           "type": "number",
           "validation": { "min": 5, "max": 1000 }
         },
         {
           "key": "algorithm.sensitivity",
-          "label": "置信度灵敏度",
+          "label": "Confidence Sensitivity",
           "type": "slider",
           "validation": { "min": 0.0, "max": 1.0, "step": 0.01 }
         },
         {
           "key": "algorithm.modelPath",
-          "label": "权重模型文件路径",
+          "label": "Model Weight Path",
           "type": "string"
         }
       ]
@@ -297,140 +299,140 @@ workspace_root/                   # 工作区根目录（或放置于 config/ �
 
 ---
 
-## 🔧 开发与构建
+## 🔧 Development & Build
 
-如果您是开发者或希望为 ConfigManager 贡献代码，请参考以下指南搭建本地开发与构建环境。
+If you are a developer or wish to contribute to ConfigManager, refer to the following guidelines to set up your local development environment.
 
-### 系统要求
+### System Requirements
 
-- **Node.js**: `22.x` 或以上版本
+- **Node.js**: `22.x` or higher
 - **Rust**: `1.75+` (stable toolchain)
-- **操作系统与构建工具依赖**：
-  - **Windows**: Visual Studio 2022 / 2019 C++ 编译环境
+- **OS & Build Tool Dependencies**:
+  - **Windows**: Visual Studio 2022 / 2019 C++ build tools
   - **macOS**: Xcode Command Line Tools
-  - **Linux (Ubuntu/Debian)**: 运行 `sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev libxdo-dev patchelf`
+  - **Linux (Ubuntu/Debian)**: Run `sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev libxdo-dev patchelf`
 
-### 1. 本地启动开发环境
+### 1. Local Development Setup
 
 ```bash
-# 1. 克隆代码仓库
+# 1. Clone the repository
 git clone https://github.com/tlx2024/CongfigManager.git
 cd CongfigManager
 
-# 2. 安装根目录与前端依赖
+# 2. Install root and frontend dependencies
 npm ci
 npm --prefix frontend ci
 
-# 3. 启动开发模式 (同时拉起 Vite 开发服务器与 Tauri 调试窗口)
+# 3. Start development mode (launches Vite dev server and Tauri debug window)
 npm run dev
 ```
 
-### 2. 质量检查与自动化测试
+### 2. Quality Checks & Automated Testing
 
-在提交代码前，建议运行完整的代码检查和后端单元测试：
+Before committing code, running the complete test suite and linters is recommended:
 
 ```bash
-# 执行前端 TypeScript 类型检查、diffLines 逻辑测试与前端构建
+# Run frontend TypeScript type checking, diffLines tests, and frontend build
 npm run check
 
-# 执行 Rust 后端单元测试（校验版本管理、安全原子写入等核心逻辑）
+# Run Rust backend unit tests (validating versioning, atomic write, and core logic)
 cd src-tauri
 cargo test --locked
 ```
 
-### 3. 构建发布安装包
+### 3. Build Production Installers
 
 ```bash
-# 本地编译生产版本安装包 (生成产物位于 src-tauri/target/release/bundle/)
+# Build production installers locally (outputs located in src-tauri/target/release/bundle/)
 npm run build
 ```
 
 ---
 
-## 📚 项目详细文档
+## 📚 Documentation
 
-为方便深入理解系统原理与开发流程，本项目提供了详尽的专项目录文档：
+For deeper insights into system internals and development workflows, refer to the dedicated documentation files:
 
-| 文档名称 | 路径 | 核心内容说明 |
-|----------|------|--------------|
-| 🛠️ **开发者指南** | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | 本地运行、架构细节、锁文件管理及持续集成说明 |
-| 🚀 **应用发布手册** | [docs/RELEASING.md](docs/RELEASING.md) | 版本号同步约定、Tag 打包流程与全平台安装包发布核对 |
-| 📋 **版本设计规范** | [docs/plans/schema-config-versioning.md](docs/plans/schema-config-versioning.md) | Schema 与配置版本化分层设计、快照备份与回滚机制深度剖析 |
-| 📄 **版权与署名说明** | [COPYRIGHT.md](COPYRIGHT.md) | 原作者版权归属声明与开源使用法律准则 |
-| 🤝 **贡献指南** | [CONTRIBUTING.md](CONTRIBUTING.md) | 问题反馈、功能请求与代码提交标准流程 |
-
----
-
-## 🗺️ 发展路线图 (Roadmap)
-
-- [x] **v0.1.0 (当前版本)**
-  - [x] 基于 Tauri 2 的轻量级跨平台桌面端应用架构
-  - [x] JSON 与 XML 格式文件的双视图协同编辑（表单 / 源码）
-  - [x] 基于 Groups Schema 的动态表单渲染与条件联动展示
-  - [x] 智能 Schema 逆向推导与一键默认 Schema 生成
-  - [x] 内置可视化 Schema 设计工作台
-  - [x] 配置与 Schema 独立双轨版本管理与自动快照备份
-  - [x] GitHub Actions 多平台自动化矩阵构建与发布（EXE/MSI/DMG/AppImage/DEB）
-- [ ] **v0.2.0 (规划中)**
-  - [ ] 跨版本可视化行级差异对比视图 (Visual Diff View)
-  - [ ] 历史版本一键快速生成 Diff 报告与变更导出
-- [ ] **v0.3.0 (规划中)**
-  - [ ] 增加 YAML (`.yaml` / `.yml`) 与 TOML 格式的原生支持
-  - [ ] 支持 JSON ↔ XML ↔ YAML 跨格式一键转换
-- [ ] **v0.4.0 (规划中)**
-  - [ ] 远程工作区支持（通过 SSH / Git 协议远程连接与同步配置目录）
-  - [ ] 团队多人协作时的配置变更冲突检测与合并提示
-- [ ] **v0.5.0 (远期规划)**
-  - [ ] 批量配置一致性校验与导出报表
-  - [ ] 行业配置模板库与自定义规则插件化扩展
+| Document | Path | Key Topics |
+|---|---|---|
+| 🛠️ **Developer Guide** | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Local setup, architectural details, lockfile management, and CI workflows |
+| 🚀 **Release Manual** | [docs/RELEASING.md](docs/RELEASING.md) | Version synchronization, tag bundling procedures, and multi-platform verification |
+| 📋 **Versioning Specification** | [docs/plans/schema-config-versioning.md](docs/plans/schema-config-versioning.md) | Tiered version design, history snapshots, and rollback mechanics |
+| 📄 **Copyright & Attribution** | [COPYRIGHT.md](COPYRIGHT.md) | Original author copyright notice and open-source legal guidelines |
+| 🤝 **Contributing Guide** | [CONTRIBUTING.md](CONTRIBUTING.md) | Issue reporting, feature requests, and Pull Request submission standards |
 
 ---
 
-## 🤝 参与贡献
+## 🗺️ Roadmap
 
-我们非常欢迎并感谢社区提供任何形式的贡献！
-
-1. **提交 Bug 或建议**：请先查阅已有 [Issues](https://github.com/tlx2024/CongfigManager/issues)，若无相同问题可创建新 Issue。
-2. **贡献代码**：
-   - Fork 本代码仓库并克隆到本地；
-   - 基于 `main` 分支创建特性分支（例如 `git checkout -b feature/awesome-feature`）；
-   - 遵循 [Conventional Commits](https://www.conventionalcommits.org/) 规范编写提交说明（如 `feat: add yaml support` / `fix: handle empty schema group`）；
-   - 确保通过 `npm run check` 与 `cargo test --locked`；
-   - 提交 Pull Request 并详细描述修改意图与验证方式。
-
----
-
-## 📄 开源许可证与版权声明
-
-本项目采用 **[GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)](LICENSE)** 开源许可证。
-
-- **版权归属**：Copyright (C) 2026 **[tlx2024](https://github.com/tlx2024)**。详细原作者说明见 [COPYRIGHT.md](COPYRIGHT.md)。
-- **开源准则**：在分发、再分发或基于本项目开发衍生版本时，必须保留原有版权声明与许可声明；分发修改版或通过网络提供基于修改版的服务时，均须公开对应修改的完整源代码。
-- **第三方组件**：本项目所引用的第三方依赖库各自保留其原本的开源许可证。
-
----
-
-## 🙏 致谢
-
-ConfigManager 的诞生与发展离不开开源社区众多优秀项目的坚实支持：
-
-- [Tauri](https://tauri.app/) - 打造极致轻量、高效、安全的跨平台桌面应用底座
-- [React](https://react.dev/) - 现代化组件化用户界面开发标准
-- [Ant Design](https://ant.design/) - 优秀的桌面端企业级 UI 设计语言与组件生态
-- [Rust](https://www.rust-lang.org/) - 赋予核心层极致的性能与内存安全保障
-- [Vite](https://vitejs.dev/) - 下一代前端开发与构建工具链
+- [x] **v0.1.0 (Current)**
+  - [x] Lightweight cross-platform desktop application built with Tauri 2
+  - [x] Dual-view synchronized editing for JSON and XML files (Form / Source)
+  - [x] Dynamic form rendering and conditional visibility based on Groups Schema
+  - [x] Smart reverse Schema inference and one-click default Schema generation
+  - [x] Built-in visual Schema Studio
+  - [x] Dual-track independent versioning and automated snapshot backups
+  - [x] GitHub Actions automated multi-platform matrix builds and releases (EXE/MSI/DMG/AppImage/DEB)
+- [ ] **v0.2.0 (Planned)**
+  - [ ] Visual line-by-line diff comparison view across versions (Visual Diff View)
+  - [ ] One-click diff report generation and change export from historical snapshots
+- [ ] **v0.3.0 (Planned)**
+  - [ ] Native support for YAML (`.yaml` / `.yml`) and TOML formats
+  - [ ] One-click cross-format conversion among JSON ↔ XML ↔ YAML
+- [ ] **v0.4.0 (Planned)**
+  - [ ] Remote workspace support (connect and synchronize config directories via SSH / Git)
+  - [ ] Multi-user team collaboration conflict detection and merge assistance
+- [ ] **v0.5.0 (Long-term)**
+  - [ ] Batch configuration consistency validation and exportable compliance reports
+  - [ ] Industry template library and pluggable custom rule extensions
 
 ---
 
-## 📞 联系与支持
+## 🤝 Contributing
 
-- 🐛 **问题反馈**：[GitHub Issues](https://github.com/tlx2024/CongfigManager/issues)
-- 💡 **讨论与交流**：[GitHub Discussions](https://github.com/tlx2024/CongfigManager/discussions)
-- 🌐 **官方主页与在线文档**：[https://tlx2024.github.io/CongfigManager/](https://tlx2024.github.io/CongfigManager/)
+Contributions of all kinds are warmly welcomed and appreciated!
+
+1. **Reporting Bugs or Feature Ideas**: Check existing [Issues](https://github.com/tlx2024/CongfigManager/issues) first. If no matching issue exists, feel free to open a new one.
+2. **Submitting Code**:
+   - Fork the repository and clone it locally;
+   - Create a feature branch off `main` (e.g., `git checkout -b feature/awesome-feature`);
+   - Follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages (e.g., `feat: add yaml support` / `fix: handle empty schema group`);
+   - Ensure `npm run check` and `cargo test --locked` pass cleanly;
+   - Submit a Pull Request describing your changes and verification steps in detail.
+
+---
+
+## 📄 License & Copyright
+
+This project is licensed under the **[GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)](LICENSE)**.
+
+- **Copyright**: Copyright (C) 2026 **[tlx2024](https://github.com/tlx2024)**. See [COPYRIGHT.md](COPYRIGHT.md) for full attribution.
+- **Open Source Terms**: All distributions, redistributions, or derivative works must preserve copyright and license notices. If distributing modified versions or hosting modified services over a network, the corresponding complete source code must be made publicly available under AGPL-3.0.
+- **Third-Party Libraries**: Third-party dependencies integrated in this project retain their respective open-source licenses.
+
+---
+
+## 🙏 Acknowledgements
+
+ConfigManager is built upon and inspired by outstanding open-source projects:
+
+- [Tauri](https://tauri.app/) - Ultra-lightweight, efficient, and secure cross-platform desktop foundation
+- [React](https://react.dev/) - Modern component-driven user interface standard
+- [Ant Design](https://ant.design/) - Enterprise-grade desktop UI design system and components
+- [Rust](https://www.rust-lang.org/) - Exceptional performance and memory safety for the native core
+- [Vite](https://vitejs.dev/) - Next-generation frontend tooling and bundler
+
+---
+
+## 📞 Contact & Support
+
+- 🐛 **Issue Tracker**: [GitHub Issues](https://github.com/tlx2024/CongfigManager/issues)
+- 💡 **Discussions**: [GitHub Discussions](https://github.com/tlx2024/CongfigManager/discussions)
+- 🌐 **Official Website & Docs**: [https://tlx2024.github.io/CongfigManager/](https://tlx2024.github.io/CongfigManager/)
 
 <div align="center">
 
-**⭐ 如果 ConfigManager 对您的项目开发或配置管理有所帮助，欢迎在 GitHub 上点个 Star！**
+**⭐ If ConfigManager helps your project or workflow, please give us a Star on GitHub!**
 
 Made with ❤️ by [tlx2024](https://github.com/tlx2024) and the Open Source Community.
 

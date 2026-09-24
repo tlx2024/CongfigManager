@@ -1,6 +1,6 @@
 # 开发说明
 
-这份文档面向希望修改 ConfigManager 的开发者。第一次使用软件请先读[项目首页](../README.md)。
+这份文档面向希望修改 ConfigManager 的开发者。第一次使用软件请先读[项目首页](../README-CN.md)（[English](../README.md)）。
 
 ## 技术栈与目录
 
