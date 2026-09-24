@@ -1,3 +1,5 @@
+// Copyright (C) 2026 tlx2024
+// SPDX-License-Identifier: AGPL-3.0-or-later
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use chrono::{Datelike, Timelike};

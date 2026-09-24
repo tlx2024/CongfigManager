@@ -17,3 +17,7 @@ bak/
 # Local data generated while exploring the sample workspace
 sample-workspace/config/history/
 sample-workspace/config/.meta/
+
+# Local browser preview used to capture README screenshots
+.playwright-cli/
+output/playwright/

@@ -1,3 +1,5 @@
+// Copyright (C) 2026 tlx2024
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Card, Drawer, Empty, Input, Layout, List, Modal, Space, Tabs, Tag, Typography, message, theme } from 'antd';
 import { open } from '@tauri-apps/plugin-dialog';

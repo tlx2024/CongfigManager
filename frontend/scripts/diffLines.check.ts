@@ -1,3 +1,5 @@
+// Copyright (C) 2026 tlx2024
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // 自检：node --experimental-strip-types frontend/scripts/diffLines.check.ts
 import assert from 'node:assert';
 import { diffLines } from '../src/lib/diffLines.ts';

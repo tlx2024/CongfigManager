@@ -15,5 +15,3 @@ git push origin v0.1.0
 ```
 
 发布文件包括 Windows x64 的 EXE/MSI、macOS Apple Silicon 与 Intel 的 DMG，以及 Linux x64 的 AppImage/DEB。当前 macOS 构建使用临时签名，未进行 Apple 公证；如果以后配置正式签名与公证，应同步更新 README 和 Release 说明。
-
-Pages 站点在 `main` 上更新 `docs/site/` 后自动部署。首次部署前，在仓库 Settings → Pages 中将 Source 设为 GitHub Actions。

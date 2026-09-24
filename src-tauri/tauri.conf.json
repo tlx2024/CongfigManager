@@ -11,7 +11,9 @@
             "icons/icon.png"
         ],
         "resources": {
-            "../sample-workspace/config/": "config/"
+            "../sample-workspace/config/": "config/",
+            "../LICENSE": "LICENSE",
+            "../COPYRIGHT.md": "COPYRIGHT.md"
         }
     },
     "build": {
