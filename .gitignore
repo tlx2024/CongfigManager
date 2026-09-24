@@ -1,5 +1,10 @@
 node_modules/
 .DS_Store
+.venv/
+.vscode/
+.env
+.env.*
+!.env.example
 
 # Frontend build output
 frontend/dist/
@@ -8,3 +13,7 @@ frontend/dist/
 src-tauri/target/
 src-tauri/gen/
 bak/
+
+# Local data generated while exploring the sample workspace
+sample-workspace/config/history/
+sample-workspace/config/.meta/

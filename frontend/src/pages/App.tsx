@@ -1,22 +1,30 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Card, Input, Layout, List, Modal, Space, Tabs, Typography, message, theme } from 'antd';
+import { Alert, Button, Card, Drawer, Empty, Input, Layout, List, Modal, Space, Tabs, Tag, Typography, message, theme } from 'antd';
 import { open } from '@tauri-apps/plugin-dialog';
 import { XMLBuilder, XMLParser } from 'fast-xml-parser';
 import DynamicForm from '../components/DynamicForm';
+import SchemaEditor from './SchemaEditor';
 import {
     EntryDetail,
+    HistoryEntry,
+    HistoryListResult,
     MatchedEntrySummary,
+    MetaStatus,
     defaultWorkspaceRoot,
     generateDefaultSchemas,
     listEntries,
+    listHistory,
     readEntry,
-    readLatestHistory,
+    readEntryMeta,
+    readHistoryFile,
     schemaSetupSuggestion,
     saveEntryText
 } from '../tauri';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
+
+const LAST_ROOT_KEY = 'config-manager:lastWorkspaceRoot';
 
 type FormMeta = {
     schemaName: string;
@@ -272,6 +280,13 @@ export default function App() {
     const [activeTab, setActiveTab] = useState<'form' | 'source'>('form');
     const [schemaPromptDismissed, setSchemaPromptDismissed] = useState(false);
 
+    // 版本化：当前条目的 meta 状态 + 历史版本抽屉
+    const [metaStatus, setMetaStatus] = useState<MetaStatus | null>(null);
+    const [note, setNote] = useState('');
+    const [historyOpen, setHistoryOpen] = useState(false);
+    const [schemaEditorOpen, setSchemaEditorOpen] = useState(false);
+    const [history, setHistory] = useState<HistoryListResult | null>(null);
+
     const formMeta = useMemo(() => {
         if (!detail) return null;
         try {
@@ -293,6 +308,7 @@ export default function App() {
         }
         try {
             const list = await listEntries(root);
+            localStorage.setItem(LAST_ROOT_KEY, root);
             setEntries(list);
             setSelectedPrefix(null);
             setDetail(null);
@@ -343,9 +359,9 @@ export default function App() {
             return;
         }
         Modal.confirm({
-            title: '更新默认 schema',
+            title: '生成默认 schema',
             content: '将为当前目录下所有 JSON 配置生成/更新默认 schema（仅覆盖“自动生成”的 schema，不会覆盖手写 schema）。是否继续？',
-            okText: '更新',
+            okText: '生成',
             cancelText: '取消',
             onOk: async () => {
                 try {
@@ -375,6 +391,8 @@ export default function App() {
             setSourceText(d.config_text);
             setInferredMeta(null);
             setXmlRootName(undefined);
+            setNote('');
+            await refreshMeta(root, prefix);
 
             // MVP：JSON 尝试直接解析成 values；XML 暂仅支持源码编辑
             if (d.format === 'json') {
@@ -513,15 +531,25 @@ export default function App() {
         }
     };
 
+    const refreshMeta = async (root: string, prefix: string) => {
+        try {
+            setMetaStatus(await readEntryMeta(root, prefix));
+        } catch {
+            setMetaStatus(null);
+        }
+    };
+
     const save = async () => {
         const root = workspaceRoot.trim();
         if (!detail || !root) return;
         try {
             const content = sourceText;
-            const res = await saveEntryText(root, detail.prefix, content);
+            const res = await saveEntryText(root, detail.prefix, content, note.trim());
             if (res.ok) {
-                message.success('已保存（已生成 history 备份）');
                 setDetail((prev) => (prev ? { ...prev, config_text: content } : prev));
+                setNote('');
+                await refreshMeta(root, detail.prefix);
+                message.success('已保存（已生成 history 备份并记录版本）');
             } else {
                 message.error('保存失败');
             }
@@ -531,39 +559,37 @@ export default function App() {
         }
     };
 
-    const restoreLastSaved = async () => {
+    const openHistory = async () => {
         const root = workspaceRoot.trim();
         if (!detail || !root) return;
         try {
-            const res = await readLatestHistory(root, detail.prefix);
-            const content = res.content ?? '';
-
-            // Load into editor (does NOT write back to disk automatically)
-            if (detail.format === 'json') {
-                onSourceChange(content);
-            } else if (detail.format === 'xml') {
-                onSourceChange(content);
-            } else {
-                setSourceText(content);
-                setValues({});
-                setErrors([]);
-            }
-
-            message.info('已加载最新一次 history 备份到编辑区（未写回磁盘，点击“保存”才会写回）');
+            setHistory(await listHistory(root, detail.prefix));
+            setHistoryOpen(true);
         } catch (e: any) {
-            const msg = e?.message || String(e);
-            if (String(msg).includes('No history backup found')) {
-                message.warning('暂无可恢复的历史版本（请先保存一次）');
-            } else {
-                message.error(`恢复失败: ${msg}`);
-            }
+            message.error(`读取历史失败: ${e?.message || String(e)}`);
+        }
+    };
+
+    // 只加载到编辑区，不写回磁盘：回滚也必须由用户点"保存"确认
+    const loadHistoryIntoEditor = async (item: HistoryEntry) => {
+        const root = workspaceRoot.trim();
+        if (!detail || !root) return;
+        try {
+            const res = await readHistoryFile(root, detail.prefix, item.file);
+            onSourceChange(res.content ?? '');
+            setNote(`回滚自 ${item.file}`);
+            setHistoryOpen(false);
+            message.info('已加载到编辑区（未写回磁盘，点击"保存"才会写回）');
+        } catch (e: any) {
+            message.error(`加载失败: ${e?.message || String(e)}`);
         }
     };
 
     useEffect(() => {
         (async () => {
             try {
-                const root = (await defaultWorkspaceRoot())?.trim();
+                // 上次打开的目录优先，没有再回退到后端给的默认目录
+                const root = (localStorage.getItem(LAST_ROOT_KEY) || (await defaultWorkspaceRoot()) || '').trim();
                 if (root) {
                     setWorkspaceRoot(root);
                     await reloadEntries(root);
@@ -574,6 +600,31 @@ export default function App() {
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    const handleSchemaChanged = async () => {
+        // schema 增删改会影响条目列表与版本横幅，改完就刷一次。
+        // 这里不走 reloadEntries：它会清空当前打开的条目，编辑到一半被清掉很难受。
+        const root = workspaceRoot.trim();
+        if (!root) return;
+        try {
+            setEntries(await listEntries(root));
+        } catch {
+            // ignore
+        }
+        if (selectedPrefix) await refreshMeta(root, selectedPrefix);
+    };
+
+    // Schema 管理是整页全屏视图：主界面状态在期间完整保留，返回后无需重载
+    if (schemaEditorOpen) {
+        return (
+            <SchemaEditor
+                workspaceRoot={workspaceRoot}
+                boundPrefix={detail?.prefix}
+                onExit={() => setSchemaEditorOpen(false)}
+                onSchemaChanged={handleSchemaChanged}
+            />
+        );
+    }
 
     return (
         <Layout style={{ height: '100vh', background: token.colorBgLayout }}>
@@ -626,7 +677,10 @@ export default function App() {
                         浏览...
                     </Button>
                     <Button onClick={() => reloadEntries()}>加载</Button>
-                    <Button onClick={updateDefaultSchemas}>更新默认 schema</Button>
+                    <Button onClick={updateDefaultSchemas}>生成默认 schema</Button>
+                    <Button onClick={() => setSchemaEditorOpen(true)} disabled={!workspaceRoot.trim()}>
+                        Schema 管理
+                    </Button>
                 </Space>
             </Header>
 
@@ -673,9 +727,25 @@ export default function App() {
                             <Space direction="vertical" style={{ width: '100%' }} size={12}>
                                 <Space style={{ width: '100%', justifyContent: 'space-between' }}>
                                     <div style={{ minWidth: 0 }}>
-                                        <Text strong style={{ fontSize: 16 }}>
-                                            {detail.prefix}
-                                        </Text>
+                                        <Space size={8}>
+                                            <Text strong style={{ fontSize: 16 }}>
+                                                {detail.prefix}
+                                            </Text>
+                                            {metaStatus && (
+                                                <>
+                                                    <Tag color="blue">
+                                                        {metaStatus.configVersion > 0
+                                                            ? `配置 v${metaStatus.configVersion}`
+                                                            : '配置 未纳管'}
+                                                    </Tag>
+                                                    <Tag>
+                                                        {metaStatus.schemaVersion > 0
+                                                            ? `schema v${metaStatus.schemaVersion}`
+                                                            : '无 schema'}
+                                                    </Tag>
+                                                </>
+                                            )}
+                                        </Space>
                                         <div>
                                             <Text type="secondary" ellipsis style={{ maxWidth: 760 }}>
                                                 {detail.config_path}
@@ -683,14 +753,39 @@ export default function App() {
                                         </div>
                                     </div>
                                     <Space>
-                                        <Button onClick={restoreLastSaved} disabled={!detail}>
-                                            恢复上次保存
+                                        <Input
+                                            placeholder="本次改动备注（可选）"
+                                            value={note}
+                                            onChange={(e) => setNote(e.target.value)}
+                                            style={{ width: 220 }}
+                                        />
+                                        <Button onClick={() => setSchemaEditorOpen(true)} disabled={!detail}>
+                                            Schema
+                                        </Button>
+                                        <Button onClick={openHistory} disabled={!detail}>
+                                            历史版本
                                         </Button>
                                         <Button type="primary" onClick={save} disabled={!detail}>
                                             保存
                                         </Button>
                                     </Space>
                                 </Space>
+
+                                {metaStatus?.externalModified && (
+                                    <Alert
+                                        type="warning"
+                                        showIcon
+                                        message="文件已被本工具之外的程序修改（内容哈希与记录不一致）"
+                                        description="当前显示的是磁盘内容；保存时会先备份现有文件，不会丢数据。"
+                                    />
+                                )}
+                                {metaStatus && metaStatus.status !== 'ok' && metaStatus.message && (
+                                    <Alert
+                                        type={metaStatus.status === 'schema-older' ? 'error' : 'info'}
+                                        showIcon
+                                        message={metaStatus.message}
+                                    />
+                                )}
 
                                 <Tabs
                                     activeKey={activeTab}
@@ -728,6 +823,57 @@ export default function App() {
                     )}
                 </Content>
             </Layout>
+
+            <Drawer
+                title={`历史版本 - ${detail?.prefix ?? ''}`}
+                open={historyOpen}
+                onClose={() => setHistoryOpen(false)}
+                width={520}
+            >
+                {history?.current && (
+                    <Alert
+                        style={{ marginBottom: 12 }}
+                        type="success"
+                        message={`当前：v${history.current.configVersion}（schema v${history.current.schemaVersion}）`}
+                        description={history.current.note || '无备注'}
+                    />
+                )}
+                {!history?.entries?.length ? (
+                    <Empty description="暂无历史版本（保存一次后开始记录）" />
+                ) : (
+                    <List
+                        size="small"
+                        dataSource={history.entries}
+                        renderItem={(item) => (
+                            <List.Item
+                                actions={[
+                                    <Button key="load" type="link" onClick={() => loadHistoryIntoEditor(item)}>
+                                        加载到编辑区
+                                    </Button>
+                                ]}
+                            >
+                                <List.Item.Meta
+                                    title={
+                                        <Space size={8}>
+                                            <Text strong>{item.version > 0 ? `v${item.version}` : '未记录版本'}</Text>
+                                            {item.schemaVersion > 0 && <Tag>schema v{item.schemaVersion}</Tag>}
+                                            {item.by && <Text type="secondary">{item.by}</Text>}
+                                        </Space>
+                                    }
+                                    description={
+                                        <div>
+                                            <div>{item.note || '无备注'}</div>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>
+                                                {item.file}
+                                            </Text>
+                                        </div>
+                                    }
+                                />
+                            </List.Item>
+                        )}
+                    />
+                )}
+            </Drawer>
         </Layout>
     );
 }

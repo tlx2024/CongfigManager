@@ -6,7 +6,8 @@
     "type": "module",
     "scripts": {
         "dev": "tauri dev",
-        "build": "tauri build"
+        "build": "tauri build",
+        "check": "npm --prefix frontend run typecheck && npm --prefix frontend run test && npm --prefix frontend run build"
     },
     "devDependencies": {
         "@tauri-apps/cli": "^2.0.0"

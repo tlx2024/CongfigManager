@@ -1,0 +1,38 @@
+name: 问题报告
+description: 报告可复现的错误
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: 请勿上传密钥、令牌或包含私人信息的配置文件。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 问题描述
+      description: 发生了什么？预期行为是什么？
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 请提供尽可能小的示例配置和操作步骤。
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      options: [Windows, macOS, Linux, 其他]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本或提交号
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志或截图
+      description: 如适用，请粘贴已去敏的日志或附截图。

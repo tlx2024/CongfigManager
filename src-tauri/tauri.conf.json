@@ -7,11 +7,12 @@
         "active": true,
         "icon": [
             "icons/icon.ico",
-            "icons/logo-sigmasquare.png"
+            "icons/icon.icns",
+            "icons/icon.png"
         ],
-        "resources": [
-            "../sample-workspace/config"
-        ]
+        "resources": {
+            "../sample-workspace/config/": "config/"
+        }
     },
     "build": {
         "beforeDevCommand": "npm --prefix frontend run dev",

@@ -22,6 +22,49 @@ import dayjs from 'dayjs';
 const { TextArea } = Input;
 const { Text } = Typography;
 
+/**
+ * 没有条目模板时的兜底 JSON 编辑器。
+ * 关键点：输入过程中 JSON 非法就不写回 —— 直接把文本塞回去会把一个对象变成字符串写进配置。
+ */
+const JsonTextArea: React.FC<{ value: any; disabled?: boolean; onCommit: (v: any) => void }> = ({
+    value,
+    disabled,
+    onCommit
+}) => {
+    const text = typeof value === 'string' ? value : JSON.stringify(value ?? null, null, 2);
+    const [draft, setDraft] = useState<string | null>(null);
+
+    let invalid = false;
+    if (draft !== null) {
+        try {
+            JSON.parse(draft);
+        } catch {
+            invalid = true;
+        }
+    }
+
+    return (
+        <>
+            <TextArea
+                value={draft ?? text}
+                disabled={disabled}
+                autoSize
+                onChange={(e) => {
+                    const raw = e.target.value;
+                    setDraft(raw);
+                    try {
+                        onCommit(JSON.parse(raw));
+                    } catch {
+                        // 非法 JSON 期间只留在草稿里，不写回 values
+                    }
+                }}
+                onBlur={() => setDraft(null)}
+            />
+            {invalid ? <Text type="danger">JSON 格式不正确，本次输入未写回</Text> : null}
+        </>
+    );
+};
+
 interface Field {
     key: string;
     type: string;
@@ -40,6 +83,13 @@ interface Field {
         customLabel?: string;
         level?: 'info' | 'warning' | 'error' | 'success';
         accept?: string;
+        itemLabel?: string;      // type: 'map' / 'array' 的条目标签
+        addButtonText?: string;  // type: 'map' / 'array' 的新增按钮文案
+        // field 级 array 也可以带条目模板，语义与 group.ui.itemTemplate 相同
+        itemTemplate?: {
+            fields?: Field[];
+            groups?: Group[];
+        };
     };
     validation?: {
         required?: boolean;
@@ -235,6 +285,14 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ formMeta, values, errors, onC
         const { min, max, step, readonly, allowCustom, customLabel, level } = field.ui || {};
         const { required } = field.validation || {};
 
+        // field 级 array 的条目模板：ui.itemTemplate 优先，其次沿用 field.fields
+        const rawArrayTpl = field.ui?.itemTemplate || (field.type === 'array' ? { fields: field.fields } : undefined);
+        const arrayTpl =
+            (rawArrayTpl?.fields || []).some((f) => !!f?.key && f.type !== 'description') ||
+            (rawArrayTpl?.groups || []).length > 0
+                ? rawArrayTpl
+                : undefined;
+
         const commonProps = {
             value,
             disabled: readonly,
@@ -404,48 +462,70 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ formMeta, values, errors, onC
 
             case 'array': {
                 const arr: any[] = Array.isArray(value) ? value : [];
+                const itemLabel = field.ui?.itemLabel || field.label || '项';
+
                 control = (
                     <Space direction="vertical" style={{ width: '100%' }}>
-                        {arr.map((item, idx) => (
-                            <Card
-                                size="small"
-                                key={idx}
-                                title={field.label ? `${field.label} #${idx + 1}` : `项 #${idx + 1}`}
-                                extra={
-                                    <Button
-                                        danger
-                                        size="small"
-                                        onClick={() => {
-                                            const next = [...arr];
-                                            next.splice(idx, 1);
-                                            setValue(field.key, next);
-                                        }}
-                                        disabled={readonly}
-                                    >
-                                        删除
-                                    </Button>
-                                }
-                            >
-                                <TextArea
-                                    value={typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
-                                    onChange={(e) => {
-                                        const next = [...arr];
-                                        next[idx] = e.target.value;
-                                        setValue(field.key, next);
-                                    }}
-                                    autoSize
-                                    disabled={readonly}
-                                />
-                            </Card>
-                        ))}
+                        {arr.map((item, idx) => {
+                            const itemValues = item && typeof item === 'object' && !Array.isArray(item) ? item : {};
+                            const onItemChange = (k: string, v: any) => {
+                                const next = [...arr];
+                                next[idx] = { ...itemValues, [k]: v };
+                                setValue(field.key, next);
+                            };
+
+                            return (
+                                <Card
+                                    size="small"
+                                    key={idx}
+                                    title={`${itemLabel} #${idx + 1}`}
+                                    extra={
+                                        <Button
+                                            danger
+                                            size="small"
+                                            onClick={() => {
+                                                const next = [...arr];
+                                                next.splice(idx, 1);
+                                                setValue(field.key, next);
+                                            }}
+                                            disabled={readonly}
+                                        >
+                                            删除
+                                        </Button>
+                                    }
+                                >
+                                    {arrayTpl ? (
+                                        renderGroupWithContext(
+                                            {
+                                                name: `${field.key}#${idx}`,
+                                                order: 0,
+                                                fields: arrayTpl.fields || [],
+                                                groups: arrayTpl.groups || []
+                                            },
+                                            itemValues,
+                                            onItemChange
+                                        )
+                                    ) : (
+                                        <JsonTextArea
+                                            value={item}
+                                            disabled={readonly}
+                                            onCommit={(v) => {
+                                                const next = [...arr];
+                                                next[idx] = v;
+                                                setValue(field.key, next);
+                                            }}
+                                        />
+                                    )}
+                                </Card>
+                            );
+                        })}
                         <Button
                             onClick={() => {
-                                const next = [...arr, ''];
-                                setValue(field.key, next);
+                                setValue(field.key, [...arr, arrayTpl ? buildItemDefaultFromTemplate(arrayTpl) : '']);
                             }}
                             disabled={readonly}
                         >
-                            添加
+                            {field.ui?.addButtonText || `添加${itemLabel}`}
                         </Button>
                     </Space>
                 );
@@ -463,7 +543,9 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ formMeta, values, errors, onC
                                 .filter((f) => !!f?.key && f.type !== 'description')
                                 .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
                                 .map((f) => (
-                                    <Form.Item key={f.key} label={f.label} required={!!f.validation?.required}>
+                                    // renderFieldWithAccess 自己就返回带 label 的 Form.Item，
+                                    // 这里不能再包一层，否则标签渲染两遍（"日志目录：日志目录："）
+                                    <React.Fragment key={f.key}>
                                         {renderFieldWithAccess(
                                             f,
                                             obj,
@@ -472,28 +554,136 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ formMeta, values, errors, onC
                                             },
                                             `${field.key}.${f.key}`
                                         )}
-                                    </Form.Item>
+                                    </React.Fragment>
                                 ))}
                         </Space>
                     );
                 } else {
                     // 对齐 apps/web：当 object 没有 fields schema 时，仍允许查看/编辑 JSON
                     control = (
-                        <TextArea
-                            value={typeof value === 'object' ? JSON.stringify(value ?? {}, null, 2) : '{}'}
-                            onChange={(e) => {
-                                try {
-                                    const nextObj = JSON.parse(e.target.value);
-                                    setValue(field.key, nextObj);
-                                } catch {
-                                    // typing... ignore invalid JSON
-                                }
-                            }}
-                            rows={6}
+                        <JsonTextArea
+                            value={value && typeof value === 'object' ? value : {}}
                             disabled={readonly}
+                            onCommit={(v) => setValue(field.key, v)}
                         />
                     );
                 }
+                break;
+            }
+
+            // 键是 id 的字典（如 camera-models 的 models、plc-points 的 tables）。
+            // 和 array 的区别只在于"键名由人填"，其余照 field.fields 渲染子表单。
+            case 'map': {
+                const obj: Record<string, any> = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+                const entries = Object.entries(obj);
+                const tpl = (field.fields || []).filter((f) => !!f?.key && f.type !== 'description');
+                const itemLabel = field.ui?.itemLabel || '条目';
+
+                // Object.fromEntries 后面的键会吃掉前面的同名键，那就是静默丢一整条配置。
+                // 改名撞车时直接不接受这次输入。
+                const commit = (next: Array<[string, any]>) => {
+                    const keys = next.map(([k]) => k);
+                    if (new Set(keys).size !== keys.length) return;
+                    setValue(field.key, Object.fromEntries(next));
+                };
+
+                control = (
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                        {entries.map(([entryKey, entryValue], idx) => {
+                            // 折叠键用下标而不是键名，改名时才不会重挂组件、输入框才不会掉焦点
+                            const collapsedKey = `map:${field.key}:${idx}`;
+                            const itemValues = entryValue && typeof entryValue === 'object' ? entryValue : {};
+
+                            return (
+                                <Collapse
+                                    key={collapsedKey}
+                                    activeKey={isCollapsed(collapsedKey) ? [] : [collapsedKey]}
+                                    onChange={() => toggleCollapsed(collapsedKey)}
+                                    items={[
+                                        {
+                                            key: collapsedKey,
+                                            label: `${itemLabel} ${entryKey}`,
+                                            extra: (
+                                                <Button
+                                                    danger
+                                                    size="small"
+                                                    disabled={readonly}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        commit(entries.filter((_, i) => i !== idx));
+                                                    }}
+                                                >
+                                                    删除
+                                                </Button>
+                                            ),
+                                            children: (
+                                                <Space direction="vertical" style={{ width: '100%' }}>
+                                                    <Form.Item label="键名" required>
+                                                        <Input
+                                                            value={entryKey}
+                                                            disabled={readonly}
+                                                            onChange={(e) => {
+                                                                const next: Array<[string, any]> = [...entries];
+                                                                next[idx] = [e.target.value, entryValue];
+                                                                commit(next);
+                                                            }}
+                                                        />
+                                                    </Form.Item>
+
+                                                    {tpl.length > 0
+                                                        ? tpl
+                                                            .slice()
+                                                            .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                                                            .map((f) => (
+                                                                <React.Fragment key={f.key}>
+                                                                    {renderFieldWithAccess(
+                                                                        f,
+                                                                        itemValues,
+                                                                        (k, v) => {
+                                                                            const next: Array<[string, any]> = [...entries];
+                                                                            next[idx] = [entryKey, { ...itemValues, [k]: v }];
+                                                                            commit(next);
+                                                                        },
+                                                                        `${field.key}.${entryKey}.${f.key}`
+                                                                    )}
+                                                                </React.Fragment>
+                                                            ))
+                                                        : (
+                                                            // 值是标量的字典（如 logging.categories: 类别 -> 级别）
+                                                            <Form.Item label="值">
+                                                                <Input
+                                                                    value={typeof entryValue === 'string' ? entryValue : JSON.stringify(entryValue)}
+                                                                    disabled={readonly}
+                                                                    onChange={(e) => {
+                                                                        const next: Array<[string, any]> = [...entries];
+                                                                        next[idx] = [entryKey, e.target.value];
+                                                                        commit(next);
+                                                                    }}
+                                                                />
+                                                            </Form.Item>
+                                                        )}
+                                                </Space>
+                                            )
+                                        }
+                                    ]}
+                                />
+                            );
+                        })}
+
+                        <Button
+                            disabled={readonly}
+                            onClick={() => {
+                                let n = entries.length + 1;
+                                while (obj[`new-${n}`] !== undefined) n++;
+                                commit([...entries, [`new-${n}`, tpl.length > 0 ? buildItemDefaultFromTemplate({ fields: tpl }) : '']]);
+                                message.success(`已添加一${itemLabel}`);
+                            }}
+                        >
+                            {field.ui?.addButtonText || `添加${itemLabel}`}
+                        </Button>
+                    </Space>
+                );
                 break;
             }
 
@@ -512,18 +702,48 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ formMeta, values, errors, onC
                 break;
         }
 
+        // 说明放在控件下方：跟在 label 后面会把 label 列撑得很宽
+        const descriptionNode = field.description ? (
+            <Text type="secondary" style={{ display: 'block', marginTop: 4, whiteSpace: 'normal', lineHeight: 1.5 }}>
+                {field.description}
+            </Text>
+        ) : null;
+
+        // 容器型字段（map / 带 fields 的 object / 带条目模板的 array）语义上就是一个分组，
+        // 塞进 Form.Item 的控件位会把整棵子树挤在右半栏，这里改成整行 Card。
+        const isContainer =
+            widget === 'map' ||
+            (widget === 'object' && (field.fields || []).length > 0) ||
+            (widget === 'array' && !!arrayTpl);
+
+        if (isContainer) {
+            return (
+                <Card
+                    key={field.key}
+                    size="small"
+                    style={{ width: '100%' }}
+                    title={
+                        <Space size={4}>
+                            {required ? <Text type="danger">*</Text> : null}
+                            <Text strong>{field.label}</Text>
+                        </Space>
+                    }
+                >
+                    {control}
+                    {descriptionNode}
+                    {error ? <Text type="danger">{error.message}</Text> : null}
+                </Card>
+            );
+        }
+
         return (
             <Form.Item
                 key={field.key}
-                label={
-                    <Space>
-                        <Text>{field.label}</Text>
-                        {field.description ? <Text type="secondary">{field.description}</Text> : null}
-                    </Space>
-                }
+                label={field.label}
                 required={!!required}
                 validateStatus={error ? 'error' : undefined}
                 help={error ? error.message : undefined}
+                extra={descriptionNode}
             >
                 {control}
             </Form.Item>
@@ -679,10 +899,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ formMeta, values, errors, onC
     const renderGroup = (group: Group, ctxValues: Record<string, any>, ctxOnChange: (k: string, v: any) => void): React.ReactNode => {
         if (shouldHideGroup(group, ctxValues)) return null;
 
+        // array 分组自己就带了一个标题栏（Collapse），外面再包 Card/Collapse 会出现两三层同名标题
+        if (group.type === 'array') {
+            return <React.Fragment key={group.name}>{renderArrayGroup(group, ctxValues, ctxOnChange)}</React.Fragment>;
+        }
+
         const content =
-            group.type === 'array'
-                ? renderArrayGroup(group, ctxValues, ctxOnChange)
-                : group.type === 'object'
+            group.type === 'object'
                     ? renderObjectGroup(group, ctxValues, ctxOnChange)
                     : renderGroupWithContext(group, ctxValues, ctxOnChange);
 
