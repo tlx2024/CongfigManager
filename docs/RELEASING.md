@@ -15,3 +15,5 @@ git push origin v0.1.0
 ```
 
 发布文件包括 Windows x64 的 EXE/MSI、macOS Apple Silicon 与 Intel 的 DMG，以及 Linux x64 的 AppImage/DEB。当前 macOS 构建使用临时签名，未进行 Apple 公证；如果以后配置正式签名与公证，应同步更新 README 和 Release 说明。
+
+Release 发布后，核对六个安装包和 [Pages 下载页](https://tlx2024.github.io/CongfigManager/#download)。下载页会尝试从 GitHub 最新 Release 自动读取安装包；更新版本时，也应同步更新页面中写死的备用下载链接，确保 API 暂时不可用时仍可直达安装文件。

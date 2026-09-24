@@ -3,139 +3,570 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="ConfigManager：用 Schema 驱动的表单和源码视图管理 JSON、XML 配置文件的开源桌面工具。">
+    <meta name="description" content="ConfigManager：专为工程研发与算法系统打造的高性能跨平台配置管理桌面应用。支持 JSON & XML，提供表单与源码双视图、Schema 智能推导与安全原子快照备份。">
     <meta name="theme-color" content="#101b2d">
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="style.css">
-    <title>下载 ConfigManager — 桌面配置管理工具</title>
+    <script src="download.js" defer></script>
+    <title>ConfigManager — 统一配置管理桌面系统</title>
   </head>
   <body>
-    <a class="skip-link" href="#main">跳转到内容</a>
+    <a class="skip-link" href="#main">跳转到主要内容</a>
+    
     <header class="site-header">
       <div class="wrap header-inner">
-        <a class="brand" href="#top" aria-label="ConfigManager 首页">
-          <img src="icon.png" width="36" height="36" alt="">
+        <a class="brand" href="#top" aria-label="ConfigManager 官方主页">
+          <img src="icon.png" width="36" height="36" alt="ConfigManager 徽标">
           <span>ConfigManager</span>
         </a>
         <nav aria-label="主导航">
-          <a href="#download">下载</a>
-          <a href="#start">使用</a>
-          <a href="#features">功能</a>
-          <a class="nav-source" href="https://github.com/tlx2024/CongfigManager/releases">获取程序 ↗</a>
+          <a href="#features">功能特性</a>
+          <a href="#screenshots">界面预览</a>
+          <a href="#download">下载中心</a>
+          <a href="#start">使用指南</a>
+          <a href="#spec">工作区规范</a>
+          <a href="#architecture">系统架构</a>
+          <a href="#faq">常见问题</a>
+          <a class="nav-source" href="https://github.com/tlx2024/CongfigManager" target="_blank" rel="noopener">GitHub 源码 ↗</a>
         </nav>
       </div>
     </header>
 
     <main id="main">
+      <!-- 英雄区块 (Hero) -->
       <section class="hero" id="top" aria-labelledby="hero-title">
         <div class="wrap hero-grid">
           <div class="hero-copy">
-            <p class="eyebrow"><span class="pulse"></span> Windows · macOS · Linux 桌面应用</p>
-            <h1 id="hero-title">配置文件，<br><span>看得懂，也改得稳。</span></h1>
-            <p class="hero-description">为 JSON 和 XML 配置提供表单与源码双视图。用自定义 Schema 描述字段，保存前自动备份，并保留配置与 Schema 的版本记录。</p>
+            <p class="eyebrow">
+              <span class="pulse"></span> v0.1.0 正式发布 · 开源跨平台配置管理工作站 · AGPL-3.0
+            </p>
+            <h1 id="hero-title">统一配置管理，<br><span>看得清、改得准、控得住。</span></h1>
+            <p class="hero-description">
+              专为复杂研发工程、算法调优与自动化系统打造的高性能桌面应用。支持 <strong>JSON 与 XML</strong> 双格式，提供<strong>结构化表单</strong>与<strong>高精源码</strong>双向同步编辑，具备 <strong>Schema 智能逆向推导</strong>与<strong>独立快照安全版本控制</strong>。
+            </p>
             <div class="hero-actions">
-              <a class="button button-primary" href="#download">下载安装 <span aria-hidden="true">↗</span></a>
-              <a class="button button-secondary" href="#start">使用方法</a>
+              <a class="button button-primary" href="#download">
+                立即下载客户端 (v0.1.0) <span aria-hidden="true">⬇</span>
+              </a>
+              <a class="button button-secondary" href="#features">
+                核心功能详解
+              </a>
+              <a class="button button-secondary" href="#start">
+                快速上手指南
+              </a>
             </div>
-            <p class="hero-footnote">下载对应系统的安装包即可使用 · AGPL-3.0-or-later</p>
+            <div class="hero-badge-row">
+              <span class="badge-pill">⚡ Tauri 2 + Rust 原生极速</span>
+              <span class="badge-pill">🛡️ 原子写入与安全备份</span>
+              <span class="badge-pill">📋 Schema 智能推导</span>
+              <span class="badge-pill">🔒 100% 离线数据优先</span>
+            </div>
+            <p class="hero-footnote">原生支持 Windows x64 · macOS (Apple Silicon / Intel) · Linux x64 · 无需运行环境</p>
           </div>
-          <div class="preview" aria-label="应用工作流程示意">
-            <div class="preview-top"><span></span><span></span><span></span><strong>ConfigManager</strong></div>
+          <div class="preview" aria-label="ConfigManager 界面工作流示意">
+            <div class="preview-top">
+              <span></span><span></span><span></span>
+              <strong>ConfigManager v0.1.0</strong>
+            </div>
             <div class="preview-body">
               <aside class="preview-side">
-                <small>工作区</small>
-                <div class="preview-path">sample-workspace/config</div>
-                <small>配置文件</small>
+                <small>工作区目录</small>
+                <div class="preview-path" title="sample-workspace/config">sample-workspace/config</div>
+                <small>配置文件清单</small>
                 <div class="preview-entry active">▣ &nbsp; algorithms.json</div>
                 <div class="preview-entry">◫ &nbsp; schemas/</div>
-                <div class="preview-entry">◷ &nbsp; history/</div>
+                <div class="preview-entry">◷ &nbsp; history/ (安全快照)</div>
+                <div class="preview-entry">⚙ &nbsp; .meta/ (版本审计)</div>
               </aside>
               <div class="preview-main">
-                <div class="preview-title"><span>algorithms.json</span><span class="preview-tag">JSON</span></div>
-                <div class="preview-tabs"><span>表单</span><span>源码</span><span>历史</span></div>
-                <div class="preview-card"><div class="preview-card-title">基础配置</div><div class="preview-line"><label>算法名称</label><div>RandomBoxAlgorithm</div></div><div class="preview-line"><label>启用</label><div class="toggle" aria-hidden="true"></div></div><div class="preview-line"><label>模型路径</label><div>./config/models/…</div></div></div>
-                <div class="preview-save">保存配置</div>
+                <div class="preview-title">
+                  <span>algorithms.json</span>
+                  <span class="preview-tag">JSON v1</span>
+                </div>
+                <div class="preview-tabs">
+                  <span class="tab-active">动态表单</span>
+                  <span>源码视图</span>
+                  <span>历史快照 (Diff)</span>
+                </div>
+                <div class="preview-card">
+                  <div class="preview-card-title">算法核心参数配置 (Schema 驱动)</div>
+                  <div class="preview-line">
+                    <label>算法名称</label>
+                    <div>CircleDetection_v2</div>
+                  </div>
+                  <div class="preview-line">
+                    <label>启用检测</label>
+                    <div class="toggle" aria-hidden="true"></div>
+                  </div>
+                  <div class="preview-line">
+                    <label>最小半径</label>
+                    <div>10 px (校验范围: 1~500)</div>
+                  </div>
+                  <div class="preview-line">
+                    <label>置信灵敏度</label>
+                    <div>0.85 (步长 0.01)</div>
+                  </div>
+                </div>
+                <div class="preview-footer-action">
+                  <span class="preview-tip">自动备份旧版本</span>
+                  <div class="preview-save">保存并更新版本</div>
+                </div>
               </div>
             </div>
-            <p class="preview-caption">界面结构示意 · 使用仓库内的示例配置</p>
+            <p class="preview-caption">内置示例工作区算法配置交互示意图</p>
           </div>
         </div>
       </section>
 
+      <!-- 下载中心 (对齐 v0.1.0 官方 Release 资产) -->
       <section class="section download-section" id="download" aria-labelledby="download-title">
         <div class="wrap">
-          <p class="section-kicker">下载应用</p>
-          <h2 id="download-title">选择你的系统，开始使用</h2>
-          <p class="section-intro">无需准备开发环境。所有安装包由 GitHub Actions 构建，并随版本发布到 GitHub Releases。</p>
+          <p class="section-kicker">下载客户端</p>
+          <h2 id="download-title">官方正式版安装包下载</h2>
+          <p class="section-intro">
+            开箱即用，<strong>无需配置 Node.js、Rust 或任何编译器环境</strong>。所有安装包由 GitHub Actions 跨平台矩阵自动化编译并上传至 GitHub Releases。
+          </p>
+          
+          <div class="release-status-box">
+            <span class="release-indicator"></span>
+            <p class="release-status" id="release-status" role="status">
+              当前最新版本：<strong class="tag-highlight">v0.1.0</strong> · 已对齐 GitHub Releases 官方发布安装包
+            </p>
+          </div>
+
           <div class="download-grid">
-            <article class="download-card"><span class="download-platform">Windows</span><h3>Windows x64</h3><p>下载安装 EXE 或 MSI，运行安装程序即可。</p><a href="https://github.com/tlx2024/CongfigManager/releases">选择 Windows 安装包 ↗</a><small>EXE · MSI</small></article>
-            <article class="download-card"><span class="download-platform">macOS</span><h3>Apple Silicon / Intel</h3><p>按处理器选择 DMG，打开后拖入“应用程序”。</p><a href="https://github.com/tlx2024/CongfigManager/releases">选择 macOS 安装包 ↗</a><small>DMG · ARM64 / x64</small></article>
-            <article class="download-card"><span class="download-platform">Linux</span><h3>Linux x64</h3><p>选择通用 AppImage，或用于 Debian/Ubuntu 的 DEB。</p><a href="https://github.com/tlx2024/CongfigManager/releases">选择 Linux 安装包 ↗</a><small>AppImage · DEB</small></article>
+            <!-- Windows -->
+            <article class="download-card">
+              <div class="download-card-header">
+                <span class="download-platform">Windows</span>
+                <span class="platform-chip">x64 架构</span>
+              </div>
+              <h3>Windows x64</h3>
+              <p>适用于 Windows 10 / 11 64位系统。提供双击向导安装包与企业静默部署 MSI 包。</p>
+              <div class="download-links" data-platform="windows">
+                <a class="download-btn download-btn-primary" href="https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64-setup.exe" title="ConfigReader.Config.Manager_0.1.0_x64-setup.exe">
+                  <span class="btn-text">下载 EXE 安装包 (推荐)</span>
+                  <span class="btn-badge">EXE</span>
+                </a>
+                <a class="download-btn" href="https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64_en-US.msi" title="ConfigReader.Config.Manager_0.1.0_x64_en-US.msi">
+                  <span class="btn-text">下载 MSI 企业部署包</span>
+                  <span class="btn-badge">MSI</span>
+                </a>
+              </div>
+              <div class="download-card-footer">
+                <small>兼容 Win 10/11 · 支持静默安装</small>
+              </div>
+            </article>
+
+            <!-- macOS -->
+            <article class="download-card">
+              <div class="download-card-header">
+                <span class="download-platform">macOS</span>
+                <span class="platform-chip">Apple Silicon & Intel</span>
+              </div>
+              <h3>macOS 客户端</h3>
+              <p>原生适配 macOS 11.0+。按处理器架构选择专属 DMG 镜像，打开后拖入“应用程序”。</p>
+              <div class="download-links" data-platform="macos">
+                <a class="download-btn download-btn-primary" href="https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_aarch64.dmg" title="ConfigReader.Config.Manager_0.1.0_aarch64.dmg">
+                  <span class="btn-text">下载 Apple Silicon DMG (M系列)</span>
+                  <span class="btn-badge">ARM64</span>
+                </a>
+                <a class="download-btn" href="https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_x64.dmg" title="ConfigReader.Config.Manager_0.1.0_x64.dmg">
+                  <span class="btn-text">下载 Intel x64 DMG</span>
+                  <span class="btn-badge">x86_64</span>
+                </a>
+              </div>
+              <div class="download-card-footer">
+                <small>首次打开若提示无法验证，见下方 Gatekeeper 说明</small>
+              </div>
+            </article>
+
+            <!-- Linux -->
+            <article class="download-card">
+              <div class="download-card-header">
+                <span class="download-platform">Linux</span>
+                <span class="platform-chip">x64 (amd64)</span>
+              </div>
+              <h3>Linux x64</h3>
+              <p>适用于 Ubuntu、Debian、Fedora、Arch 等主流发行版。提供免安装 AppImage 与 DEB 安装包。</p>
+              <div class="download-links" data-platform="linux">
+                <a class="download-btn download-btn-primary" href="https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_amd64.AppImage" title="ConfigReader.Config.Manager_0.1.0_amd64.AppImage">
+                  <span class="btn-text">下载 AppImage (免安装推荐)</span>
+                  <span class="btn-badge">APPIMAGE</span>
+                </a>
+                <a class="download-btn" href="https://github.com/tlx2024/CongfigManager/releases/download/v0.1.0/ConfigReader.Config.Manager_0.1.0_amd64.deb" title="ConfigReader.Config.Manager_0.1.0_amd64.deb">
+                  <span class="btn-text">下载 DEB 安装包</span>
+                  <span class="btn-badge">DEB</span>
+                </a>
+              </div>
+              <div class="download-card-footer">
+                <small>AppImage 需赋权：chmod +x *.AppImage</small>
+              </div>
+            </article>
           </div>
-          <p class="download-note">若尚无正式版本，可从 <a href="https://github.com/tlx2024/CongfigManager/actions/workflows/ci.yml">最新构建记录</a>下载临时安装包。</p>
+
+          <!-- 平台运行须知小贴士 -->
+          <div class="tips-box">
+            <h4>💡 安装与运行注意事项</h4>
+            <div class="tips-grid">
+              <div class="tip-item">
+                <strong>macOS 首次运行提示“无法打开”：</strong>
+                <p>当前构建使用临时自签名。若 macOS 拦截打开，请前往 <strong>「系统设置」→「隐私与安全性」</strong> 点击 <strong>「仍要打开」</strong>；或在终端中执行：<code>sudo xattr -cr /Applications/Config\ Manager.app</code> 即可解除隔离。</p>
+              </div>
+              <div class="tip-item">
+                <strong>Linux AppImage 快速运行指南：</strong>
+                <p>下载 <code>.AppImage</code> 后，在终端执行 <code>chmod +x ConfigReader.Config.Manager_*.AppImage</code> 赋予执行权限，双击或在终端输入 <code>./ConfigReader.Config.Manager_*.AppImage</code> 即可直接运行。</p>
+              </div>
+            </div>
+            <p class="download-note">
+              更多版本发布记录与校验信息，请访问 <a href="https://github.com/tlx2024/CongfigManager/releases/tag/v0.1.0" target="_blank" rel="noopener">GitHub Releases v0.1.0</a> 或查看 <a href="https://github.com/tlx2024/CongfigManager/actions/workflows/ci.yml" target="_blank" rel="noopener">GitHub Actions 构建记录</a>。
+            </p>
+          </div>
         </div>
       </section>
 
-      <section class="section section-alt" id="features" aria-labelledby="features-title">
+      <!-- 真实界面截图展示 -->
+      <section class="section section-alt" id="screenshots" aria-labelledby="screenshots-title">
         <div class="wrap">
-          <p class="section-kicker">核心能力</p>
-          <h2 id="features-title">从编辑到回溯，一处完成</h2>
-          <div class="feature-grid">
-            <article class="feature"><div class="feature-icon">01</div><h3>双视图编辑</h3><p>表单方便日常维护；源码视图保留对原始 JSON 或 XML 的直接控制。</p></article>
-            <article class="feature"><div class="feature-icon">02</div><h3>Schema 驱动</h3><p>通过分组、字段校验和条件展示组织表单。没有 Schema 时，也能从现有内容推导表单。</p></article>
-            <article class="feature"><div class="feature-icon">03</div><h3>版本与备份</h3><p>保存前备份旧文件，记录配置与 Schema 版本；历史内容可先加载到编辑区，再决定是否保存。</p></article>
-            <article class="feature"><div class="feature-icon">04</div><h3>本地文件优先</h3><p>直接使用你的配置目录，支持 JSON、XML 与配套 Schema；后端校验访问路径并采用原子写入。</p></article>
+          <p class="section-kicker">界面预览</p>
+          <h2 id="screenshots-title">现代化的桌面操作界面</h2>
+          <p class="section-intro">
+            以下截图为 ConfigManager 运行内置算法配置工程时的真实界面，涵盖日常表单维护、精确源码控制与图形化 Schema 设计。
+          </p>
+
+          <div class="gallery-grid">
+            <div class="screenshot-card">
+              <div class="screenshot-header">
+                <span class="screenshot-badge">核心视图</span>
+                <h3>结构化动态表单编辑器</h3>
+              </div>
+              <div class="screenshot-img-wrap">
+                <img src="screenshots/main-form.png" alt="结构化动态表单编辑器截图" loading="lazy">
+              </div>
+              <p class="screenshot-desc">根据 Schema 分组自动渲染卡片与输入控件，支持数值上下限校验、开关切换、联动条件展示与动态数组管理，彻底杜绝手写语法错误。</p>
+            </div>
+
+            <div class="screenshot-card">
+              <div class="screenshot-header">
+                <span class="screenshot-badge">专业视图</span>
+                <h3>高精原生源码编辑器</h3>
+              </div>
+              <div class="screenshot-img-wrap">
+                <img src="screenshots/source-editor.png" alt="高精原生源码编辑器截图" loading="lazy">
+              </div>
+              <p class="screenshot-desc">为进阶开发者提供原汁原味的 JSON 与 XML 文本视图，保留原有缩进排版与层级结构，支持快速文本拷贝、批量替换与底层语法核对。</p>
+            </div>
+
+            <div class="screenshot-card">
+              <div class="screenshot-header">
+                <span class="screenshot-badge">可视化设计</span>
+                <h3>内置 Schema 设计工作室</h3>
+              </div>
+              <div class="screenshot-img-wrap">
+                <img src="screenshots/schema-editor.png" alt="内置 Schema 设计工作室截图" loading="lazy">
+              </div>
+              <p class="screenshot-desc">告别手写繁琐的 JSON Schema。图形化编排分组层级、字段类型、校验规则与联动条件，右侧实时交互渲染表单效果，所见即所得。</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="section" id="start" aria-labelledby="start-title">
+      <!-- 核心功能深度剖析 -->
+      <section class="section" id="features" aria-labelledby="features-title">
+        <div class="wrap">
+          <p class="section-kicker">深度特性</p>
+          <h2 id="features-title">为配置管理全流程提供安全保障</h2>
+          <p class="section-intro">
+            从配置浏览、结构约束、日常修改到故障回滚，ConfigManager 将分散的配置工作收拢至安全闭环。
+          </p>
+
+          <div class="feature-grid-6">
+            <article class="feature-block">
+              <div class="feature-block-icon">01</div>
+              <h3>双视图实时同步</h3>
+              <p>结构化表单负责直观交互与防呆校验；源码视图保留对底层 JSON / XML 的直接控制。两者无缝切换，编辑内容保留在内存缓冲中，显式保存杜绝误写。</p>
+            </article>
+
+            <article class="feature-block">
+              <div class="feature-block-icon">02</div>
+              <h3>Schema 驱动与智能推导</h3>
+              <p>采用特有的 Groups Schema 规范，定义字段范围、枚举、必填项与动态条件联动。即使没有任何现成 Schema，应用也能自动从已有配置推导出可用表单。</p>
+            </article>
+
+            <article class="feature-block">
+              <div class="feature-block-icon">03</div>
+              <h3>可视化 Schema 工作室</h3>
+              <p>内置完整的 Schema 管理控制台。支持一键生成默认 Schema、图形化增删字段与调整校验规则，并在右侧实时预览最终动态表单效果。</p>
+            </article>
+
+            <article class="feature-block">
+              <div class="feature-block-icon">04</div>
+              <h3>双轨版本追踪与快照备份</h3>
+              <p>配置文件与 Schema 拥有各自独立的版本体系。每次保存前自动在 <code>history/</code> 生成带时间戳的完整快照，支持无损载入历史对比并随时安全回滚。</p>
+            </article>
+
+            <article class="feature-block">
+              <div class="feature-block-icon">05</div>
+              <h3>非侵入元数据与原子写入</h3>
+              <p>所有版本号与操作审计信息独立存储在 <code>.meta/</code> 目录，绝不篡改用户的业务配置内容。底层采用临时文件与原子重命名写入，彻底规避断电损坏。</p>
+            </article>
+
+            <article class="feature-block">
+              <div class="feature-block-icon">06</div>
+              <h3>100% 本地优先与数据私密</h3>
+              <p>所有配置解析与文件 IO 完全运行在用户本地设备与沙箱环境中，无远程云端依赖，无任何远程遥测，专为企业内网、涉密系统与工程现场量身打造。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 使用指南与标准化工作流 -->
+      <section class="section section-alt" id="start" aria-labelledby="start-title">
         <div class="wrap start-grid">
           <div>
-            <p class="section-kicker">开始使用</p>
-            <h2 id="start-title">打开程序，选好配置目录</h2>
-            <p class="section-intro">首次启动时应用会准备一份可编辑的示例配置。你也可以随时切换到自己的 JSON 或 XML 配置目录。</p>
+            <p class="section-kicker">使用指南</p>
+            <h2 id="start-title">标准使用工作流</h2>
+            <p class="section-intro">
+              简单清晰的操作步骤，让新手工程师在几分钟内即可掌握整个配置管理流程。
+            </p>
             <ol class="steps">
-              <li><strong>安装并打开</strong><span>下载与你的系统、处理器匹配的安装包。</span></li>
-              <li><strong>选择配置目录</strong><span>保留示例目录，或点击“浏览…”选择自己的目录。</span></li>
-              <li><strong>编辑并保存</strong><span>选择表单或源码视图；保存前会备份旧文件。</span></li>
+              <li>
+                <strong>安装并启动客户端</strong>
+                <span>下载对应系统架构的安装包，双击运行即可。首次启动自动载入可交互的示例配置。</span>
+              </li>
+              <li>
+                <strong>选择本地配置目录</strong>
+                <span>点击顶部「浏览…」选择实际工程所在目录。支持配置文件放置在根目录或 <code>config/</code> 子目录下。</span>
+              </li>
+              <li>
+                <strong>表单修改与智能校验</strong>
+                <span>在左侧列表选中配置条目，在「表单」中调节数值、开关与选项。系统即时检查合法性并联动展示相关字段。</span>
+              </li>
+              <li>
+                <strong>提交备注并安全保存</strong>
+                <span>确认修改无误后点击「保存配置」。系统自动在 <code>history/</code> 生成备份快照，更新 <code>.meta/</code> 版本记录并原子覆写。</span>
+              </li>
+              <li>
+                <strong>历史对比与一键回退</strong>
+                <span>若发现新配置不符合预期，切换到「历史」标签，载入指定历史快照到编辑区核对，点击保存即可一键回滚。</span>
+              </li>
             </ol>
           </div>
+
           <div class="usage-panel">
-            <div class="usage-panel-heading">一次保存，保留来路</div>
-            <div class="usage-row"><span>01</span><strong>读取配置</strong><small>JSON / XML</small></div>
-            <div class="usage-row"><span>02</span><strong>编辑内容</strong><small>表单 / 源码</small></div>
-            <div class="usage-row"><span>03</span><strong>保存版本</strong><small>自动备份</small></div>
-            <p>历史内容可先加载回编辑区，再由你决定是否保存。</p>
+            <div class="usage-panel-heading">安全闭环机制</div>
+            <div class="usage-row">
+              <span>01</span>
+              <div>
+                <strong>本地目录扫描</strong>
+                <p>自动识别 .json、.xml 以及配套 schemas/</p>
+              </div>
+              <small>格式支持</small>
+            </div>
+            <div class="usage-row">
+              <span>02</span>
+              <div>
+                <strong>内存隔离编辑</strong>
+                <p>表单与源码双向校验，未保存前绝不影响磁盘</p>
+              </div>
+              <small>防误触</small>
+            </div>
+            <div class="usage-row">
+              <span>03</span>
+              <div>
+                <strong>自动生成快照</strong>
+                <p>保存前强制完整备份旧文件至 history/ 目录</p>
+              </div>
+              <small>历史归档</small>
+            </div>
+            <div class="usage-row">
+              <span>04</span>
+              <div>
+                <strong>原子安全替换</strong>
+                <p>临时文件校验后原子替换原文件，杜绝写入中断损坏</p>
+              </div>
+              <small>高可靠</small>
+            </div>
+            <p class="usage-footnote">历史快照载入后仅更新前端编辑区，确认满意后显式点击保存才会写回磁盘，保护生产环境无后顾之忧。</p>
           </div>
         </div>
       </section>
 
-      <section class="section" aria-labelledby="schema-title">
-        <div class="wrap schema-grid">
+      <!-- 工作区结构与 Schema 规范说明 -->
+      <section class="section" id="spec" aria-labelledby="spec-title">
+        <div class="wrap spec-section-grid">
           <div>
-            <p class="section-kicker">现有配置也能用</p>
-            <h2 id="schema-title">直接选择你的配置目录</h2>
-            <p class="section-intro">把 JSON 或 XML 文件放在同一目录即可加载。需要更明确的字段分组和校验时，可以在 <code>schemas/</code> 中加入对应的 Schema。</p>
-            <a class="text-link" href="https://github.com/tlx2024/CongfigManager/blob/main/docs/DEVELOPMENT.md#工作区格式">查看目录说明 ↗</a>
+            <p class="section-kicker">工作区规范</p>
+            <h2 id="spec-title">非侵入式的文件组织约定</h2>
+            <p class="section-intro">
+              无需重构现有的项目结构。只需将配置目录指定给 ConfigManager，系统即可自动按照业界最佳实践管理 Schema、历史与元数据。
+            </p>
+            <div class="spec-highlights">
+              <div class="spec-highlight-card">
+                <strong>纯净业务文件</strong>
+                <p>配置内容保持原生标准语法，不掺杂任何私有标记。</p>
+              </div>
+              <div class="spec-highlight-card">
+                <strong>独立版本存储</strong>
+                <p>元数据存储在 <code>.meta/</code>，历史快照存储在 <code>history/</code>。</p>
+              </div>
+            </div>
+            <a class="text-link" href="https://github.com/tlx2024/CongfigManager/blob/main/docs/DEVELOPMENT.md" target="_blank" rel="noopener">
+              阅读完整开发与目录说明文档 ↗
+            </a>
           </div>
-          <pre class="tree"><code>workspace/
-├── algorithms.json
-├── schemas/
-│   └── algorithms.schema.json
-├── history/       <span>保存时生成</span>
-└── .meta/         <span>版本信息</span></code></pre>
+
+          <div class="code-panel">
+            <div class="code-panel-header">
+              <span class="code-dot red"></span>
+              <span class="code-dot yellow"></span>
+              <span class="code-dot green"></span>
+              <span class="code-title">典型工程配置工作区目录树</span>
+            </div>
+            <pre class="tree"><code>workspace_root/                   <span># 配置工作区根目录</span>
+├── algorithms.json               <span># 业务配置文件 (JSON 格式)</span>
+├── camera_config.xml             <span># 业务配置文件 (XML 格式)</span>
+│
+├── schemas/                      <span># 对应的 Groups Schema 定义目录</span>
+│   ├── algorithms.schema.json    <span># algorithms.json 专用表单规则</span>
+│   └── camera_config.schema.json
+│
+├── history/                      <span># 变更历史快照 (点击保存时自动生成)</span>
+│   ├── algorithms.json.1737600000.bak
+│   └── algorithms.schema.json.1737600000.bak
+│
+└── .meta/                        <span># 版本元数据与审计记录 (不侵入原文件)</span>
+    ├── algorithms.json.meta.json
+    └── algorithms.schema.json.meta.json</code></pre>
+          </div>
         </div>
       </section>
 
+      <!-- 系统架构与技术选型 -->
+      <section class="section section-alt" id="architecture" aria-labelledby="arch-title">
+        <div class="wrap">
+          <p class="section-kicker">底层工程</p>
+          <h2 id="arch-title">系统架构与技术选型</h2>
+          <p class="section-intro">
+            融合现代 Web 技术的灵活交互与系统级语言的高性能安全性，为桌面端生产力工具树立标杆。
+          </p>
+
+          <div class="table-wrap">
+            <table class="arch-table">
+              <thead>
+                <tr>
+                  <th>架构分层</th>
+                  <th>核心技术 / 组件</th>
+                  <th>职能说明与技术优势</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>桌面容器层</strong></td>
+                  <td>Tauri 2.0 (Rust)</td>
+                  <td>替代庞大臃肿的 Chromium 引擎，采用系统原生 Webview，启动速度大幅提升，内存占用减少 80% 以上。</td>
+                </tr>
+                <tr>
+                  <td><strong>系统核心层</strong></td>
+                  <td>Rust 1.75+ Native</td>
+                  <td>负责本地文件目录扫描、原子写入（tempfile）、路径穿越安全防御、流式 JSON / XML 高性能序列化。</td>
+                </tr>
+                <tr>
+                  <td><strong>前端展现层</strong></td>
+                  <td>React 18 + TypeScript</td>
+                  <td>组件化渲染、严格类型保障与高效局部刷新，实现表单控件、源码编辑器与快照视图的高性能渲染。</td>
+                </tr>
+                <tr>
+                  <td><strong>UI 组件系统</strong></td>
+                  <td>Ant Design 5 (Antd)</td>
+                  <td>企业级设计规范与完备控件支持，提供卡片抽屉、滑动条、微调器与弹窗，打造专业桌面体验。</td>
+                </tr>
+                <tr>
+                  <td><strong>持续集成与交付</strong></td>
+                  <td>GitHub Actions CI/CD</td>
+                  <td>多操作系统（Windows、macOS ARM/Intel、Linux）跨平台矩阵自动化编译与 Release 自动发布。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 常见问题解答 (FAQ) -->
+      <section class="section" id="faq" aria-labelledby="faq-title">
+        <div class="wrap">
+          <p class="section-kicker">解答疑惑</p>
+          <h2 id="faq-title">常见问题解答 (FAQ)</h2>
+          
+          <div class="faq-grid">
+            <article class="faq-card">
+              <h3>Q: ConfigManager 目前支持哪些配置文件格式？</h3>
+              <p>目前正式版已全面支持 <strong>JSON</strong> 和 <strong>XML</strong> 格式的双向编辑、表单推导与版本快照。YAML 与 TOML 格式的原生支持已列入开发路线图（Roadmap v0.3.0），敬请期待。</p>
+            </article>
+
+            <article class="faq-card">
+              <h3>Q: 应用会修改我的配置文件结构或插入多余字段吗？</h3>
+              <p><strong>绝对不会。</strong> ConfigManager 秉承非侵入式理念，版本号、修改者信息与变更哈希均独立保存在 <code>.meta/</code> 隐藏目录下。写入原配置文件时保持纯净的标准语法，绝无杂质。</p>
+            </article>
+
+            <article class="faq-card">
+              <h3>Q: 我的项目之前没有写过 Schema，可以直接使用吗？</h3>
+              <p><strong>完全可以。</strong> 系统内置逆向结构推导引擎，载入未配对 Schema 的配置文件时会自动推导字段类型并渲染表单。点击「生成默认 Schema」还可一键在 <code>schemas/</code> 下创建规范文件。</p>
+            </article>
+
+            <article class="faq-card">
+              <h3>Q: macOS 首次打开提示“无法打开”或“已损坏”如何解决？</h3>
+              <p>因为当前发布版本采用自签名证书。只需打开「系统设置」→「隐私与安全性」，找到阻止提示并点击「仍要打开」；或在终端中运行 <code>sudo xattr -cr /Applications/Config\ Manager.app</code> 即可完美运行。</p>
+            </article>
+
+            <article class="faq-card">
+              <h3>Q: 保存前备份的旧配置保存在哪里？如何恢复？</h3>
+              <p>旧配置自动备份在工作区目录下的 <code>history/</code> 文件夹中，命名带有具体时间戳。不仅可以直接在编辑器「历史」标签页中一键载入对比恢复，也可手动直接拷贝备份文件。</p>
+            </article>
+
+            <article class="faq-card">
+              <h3>Q: 它是纯本地运行的吗？是否存在数据外泄风险？</h3>
+              <p><strong>100% 纯本地运行。</strong> ConfigManager 没有搭建任何远程数据回传通道或遥测脚本，全部文件操作均发生在本地沙箱中，非常适合保密工程、研究所及军工工业现场。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 社区参与与反馈 -->
       <section class="community" aria-labelledby="community-title">
         <div class="wrap community-inner">
-          <div><p class="section-kicker">需要帮助？</p><h2 id="community-title">问题和建议，欢迎反馈</h2><p>遇到配置解析、安装或使用问题，可以在项目中提交反馈。</p></div>
-          <div class="community-actions"><a class="button button-primary" href="https://github.com/tlx2024/CongfigManager/issues">反馈问题</a><a class="button button-secondary" href="https://github.com/tlx2024/CongfigManager">查看开源项目</a></div>
+          <div>
+            <p class="section-kicker">开源共建</p>
+            <h2 id="community-title">欢迎参与 ConfigManager 开源建设</h2>
+            <p>遇到使用问题、功能建议或需要适配新特性？欢迎通过 GitHub 与社区互动。</p>
+          </div>
+          <div class="community-actions">
+            <a class="button button-primary" href="https://github.com/tlx2024/CongfigManager/issues" target="_blank" rel="noopener">
+              提交 Bug 或需求反馈 ↗
+            </a>
+            <a class="button button-secondary" href="https://github.com/tlx2024/CongfigManager" target="_blank" rel="noopener">
+              访问 GitHub 仓库 ↗
+            </a>
+            <a class="button button-secondary" href="https://github.com/tlx2024/CongfigManager/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">
+              贡献指南 ↗
+            </a>
+          </div>
         </div>
       </section>
     </main>
 
-    <footer><div class="wrap footer-inner"><span>Copyright (C) 2026 tlx2024 · AGPL-3.0-or-later</span><div><a href="https://github.com/tlx2024/CongfigManager">源码</a><a href="https://github.com/tlx2024/CongfigManager/blob/main/LICENSE">许可证</a></div></div></footer>
+    <footer>
+      <div class="wrap footer-inner">
+        <div>
+          <span>Copyright (C) 2026 <strong>tlx2024</strong> · 本项目按 <a href="https://github.com/tlx2024/CongfigManager/blob/main/LICENSE" target="_blank" rel="noopener">AGPL-3.0-or-later</a> 协议开源发布</span>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/tlx2024/CongfigManager" target="_blank" rel="noopener">源码仓库</a>
+          <a href="https://github.com/tlx2024/CongfigManager/releases/tag/v0.1.0" target="_blank" rel="noopener">最新发布 (v0.1.0)</a>
+          <a href="https://github.com/tlx2024/CongfigManager/blob/main/COPYRIGHT.md" target="_blank" rel="noopener">版权说明</a>
+          <a href="https://github.com/tlx2024/CongfigManager/blob/main/LICENSE" target="_blank" rel="noopener">开源协议</a>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
